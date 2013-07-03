@@ -4,17 +4,42 @@
  */
 package doxy;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.File;
+import java.io.FileFilter;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+
 /**
  *
  * @author Rendra
  */
 public class Main extends javax.swing.JFrame {
-
+    
+    private String projectFolder;
+    private DefaultMutableTreeNode rootNode;
+    private DefaultTreeModel treeModel;
+    
     /**
      * Creates new form Main
      */
     public Main() {
         initComponents();
+        CustomizeUI();
     }
 
     /**
@@ -26,113 +51,191 @@ public class Main extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jToolBar1 = new javax.swing.JToolBar();
-        jToggleButton1 = new javax.swing.JToggleButton();
-        jToggleButton2 = new javax.swing.JToggleButton();
-        jToggleButton3 = new javax.swing.JToggleButton();
+        MyToolbar = new javax.swing.JToolBar();
+        TOpenProject = new javax.swing.JToggleButton();
+        TRunProject = new javax.swing.JToggleButton();
+        TSaveProject = new javax.swing.JToggleButton();
+        mySplit = new javax.swing.JSplitPane();
+        TabPanels = new javax.swing.JTabbedPane();
+        PanelExplorerProject = new javax.swing.JPanel();
+        treeScrollPane = new javax.swing.JScrollPane();
+        myTree = new javax.swing.JTree();
+        PanelRecentProject = new javax.swing.JPanel();
+        RightContentPane = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        StatusPanel = new javax.swing.JPanel();
         MainMenu = new javax.swing.JMenuBar();
-        ProjectMenu = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuItem5 = new javax.swing.JMenuItem();
-        jMenuItem4 = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        jMenuItem6 = new javax.swing.JMenuItem();
-        jMenuItem7 = new javax.swing.JMenuItem();
-        jMenuItem8 = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JPopupMenu.Separator();
-        jMenuItem9 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jMenuItem10 = new javax.swing.JMenuItem();
-        jMenuItem11 = new javax.swing.JMenuItem();
+        MProject = new javax.swing.JMenu();
+        MILoadProject = new javax.swing.JMenuItem();
+        MIRunProject = new javax.swing.JMenuItem();
+        MSepProject = new javax.swing.JPopupMenu.Separator();
+        MFile = new javax.swing.JMenu();
+        MIParseFile = new javax.swing.JMenuItem();
+        MIParseTranslate = new javax.swing.JMenuItem();
+        MISaveAs = new javax.swing.JMenuItem();
+        MSepFile = new javax.swing.JPopupMenu.Separator();
+        MIGenDocs = new javax.swing.JMenuItem();
+        MISaveProject = new javax.swing.JMenuItem();
+        MICloseProject = new javax.swing.JMenuItem();
+        MSepExit = new javax.swing.JPopupMenu.Separator();
+        MIExit = new javax.swing.JMenuItem();
+        MHelp = new javax.swing.JMenu();
+        MICheckUpdate = new javax.swing.JMenuItem();
+        MIAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Doxy - Make Your Project Documentation Sexy");
         setName("MainFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(800, 500));
+        setResizable(false);
 
-        jToolBar1.setRollover(true);
+        MyToolbar.setFloatable(false);
+        MyToolbar.setRollover(true);
 
-        jToggleButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/load_project_big.png"))); // NOI18N
-        jToggleButton1.setFocusable(false);
-        jToggleButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jToggleButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jToggleButton1);
+        TOpenProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/load_project_big.png"))); // NOI18N
+        TOpenProject.setToolTipText("Load Project");
+        TOpenProject.setFocusable(false);
+        TOpenProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        TOpenProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
+        TOpenProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        MyToolbar.add(TOpenProject);
 
-        jToggleButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc_big.png"))); // NOI18N
-        jToggleButton2.setFocusable(false);
-        jToggleButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jToggleButton2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jToggleButton2);
+        TRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc_big.png"))); // NOI18N
+        TRunProject.setToolTipText("Generate Docs");
+        TRunProject.setFocusable(false);
+        TRunProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        TRunProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
+        TRunProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        MyToolbar.add(TRunProject);
 
-        jToggleButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as big.png"))); // NOI18N
-        jToggleButton3.setFocusable(false);
-        jToggleButton3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jToggleButton3.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jToggleButton3);
+        TSaveProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as big.png"))); // NOI18N
+        TSaveProject.setToolTipText("Save Project As");
+        TSaveProject.setFocusable(false);
+        TSaveProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        TSaveProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
+        TSaveProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        MyToolbar.add(TSaveProject);
 
-        ProjectMenu.setText("Project");
+        mySplit.setBorder(null);
+        mySplit.setDividerLocation(230);
 
-        jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/load_project.png"))); // NOI18N
-        jMenuItem1.setText("Load Project");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        ProjectMenu.add(jMenuItem1);
+        treeScrollPane.setViewportView(myTree);
 
-        jMenuItem2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/run_project.png"))); // NOI18N
-        jMenuItem2.setText("Run Project");
-        ProjectMenu.add(jMenuItem2);
-        ProjectMenu.add(jSeparator1);
+        javax.swing.GroupLayout PanelExplorerProjectLayout = new javax.swing.GroupLayout(PanelExplorerProject);
+        PanelExplorerProject.setLayout(PanelExplorerProjectLayout);
+        PanelExplorerProjectLayout.setHorizontalGroup(
+            PanelExplorerProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(treeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+        );
+        PanelExplorerProjectLayout.setVerticalGroup(
+            PanelExplorerProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(treeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
+        );
 
-        jMenu1.setText("File");
+        TabPanels.addTab("Project Explorer", PanelExplorerProject);
 
-        jMenuItem3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/parse_file.png"))); // NOI18N
-        jMenuItem3.setText("Parse File");
-        jMenu1.add(jMenuItem3);
+        javax.swing.GroupLayout PanelRecentProjectLayout = new javax.swing.GroupLayout(PanelRecentProject);
+        PanelRecentProject.setLayout(PanelRecentProjectLayout);
+        PanelRecentProjectLayout.setHorizontalGroup(
+            PanelRecentProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 225, Short.MAX_VALUE)
+        );
+        PanelRecentProjectLayout.setVerticalGroup(
+            PanelRecentProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 419, Short.MAX_VALUE)
+        );
 
-        jMenuItem5.setText("Parse & Translate");
-        jMenu1.add(jMenuItem5);
+        TabPanels.addTab("Recent Projects", PanelRecentProject);
 
-        ProjectMenu.add(jMenu1);
+        mySplit.setLeftComponent(TabPanels);
 
-        jMenuItem4.setText("Save File As");
-        ProjectMenu.add(jMenuItem4);
-        ProjectMenu.add(jSeparator2);
+        jLabel1.setText("...");
 
-        jMenuItem6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
-        jMenuItem6.setText("Generate Docs");
-        ProjectMenu.add(jMenuItem6);
+        javax.swing.GroupLayout RightContentPaneLayout = new javax.swing.GroupLayout(RightContentPane);
+        RightContentPane.setLayout(RightContentPaneLayout);
+        RightContentPaneLayout.setHorizontalGroup(
+            RightContentPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RightContentPaneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addContainerGap(543, Short.MAX_VALUE))
+        );
+        RightContentPaneLayout.setVerticalGroup(
+            RightContentPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RightContentPaneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addContainerGap(422, Short.MAX_VALUE))
+        );
 
-        jMenuItem7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as.png"))); // NOI18N
-        jMenuItem7.setText("Save Project As");
-        ProjectMenu.add(jMenuItem7);
+        mySplit.setRightComponent(RightContentPane);
 
-        jMenuItem8.setText("Close Project");
-        ProjectMenu.add(jMenuItem8);
-        ProjectMenu.add(jSeparator3);
+        StatusPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jMenuItem9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/exit.png"))); // NOI18N
-        jMenuItem9.setText("Exit");
-        ProjectMenu.add(jMenuItem9);
+        javax.swing.GroupLayout StatusPanelLayout = new javax.swing.GroupLayout(StatusPanel);
+        StatusPanel.setLayout(StatusPanelLayout);
+        StatusPanelLayout.setHorizontalGroup(
+            StatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        StatusPanelLayout.setVerticalGroup(
+            StatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 25, Short.MAX_VALUE)
+        );
 
-        MainMenu.add(ProjectMenu);
+        MProject.setText("Project");
 
-        jMenu2.setText("Help");
+        MILoadProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/load_project.png"))); // NOI18N
+        MILoadProject.setText("Load Project");
+        MProject.add(MILoadProject);
 
-        jMenuItem10.setText("Check For Update");
-        jMenu2.add(jMenuItem10);
+        MIRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/run_project.png"))); // NOI18N
+        MIRunProject.setText("Run Project");
+        MProject.add(MIRunProject);
+        MProject.add(MSepProject);
 
-        jMenuItem11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/about.png"))); // NOI18N
-        jMenuItem11.setText("About");
-        jMenu2.add(jMenuItem11);
+        MFile.setText("File");
 
-        MainMenu.add(jMenu2);
+        MIParseFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/parse_file.png"))); // NOI18N
+        MIParseFile.setText("Parse File");
+        MFile.add(MIParseFile);
+
+        MIParseTranslate.setText("Parse & Translate");
+        MFile.add(MIParseTranslate);
+
+        MProject.add(MFile);
+
+        MISaveAs.setText("Save File As");
+        MProject.add(MISaveAs);
+        MProject.add(MSepFile);
+
+        MIGenDocs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
+        MIGenDocs.setText("Generate Docs");
+        MProject.add(MIGenDocs);
+
+        MISaveProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as.png"))); // NOI18N
+        MISaveProject.setText("Save Project As");
+        MProject.add(MISaveProject);
+
+        MICloseProject.setText("Close Project");
+        MProject.add(MICloseProject);
+        MProject.add(MSepExit);
+
+        MIExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/exit.png"))); // NOI18N
+        MIExit.setText("Exit");
+        MProject.add(MIExit);
+
+        MainMenu.add(MProject);
+
+        MHelp.setText("Help");
+
+        MICheckUpdate.setText("Check For Update");
+        MHelp.add(MICheckUpdate);
+
+        MIAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/about.png"))); // NOI18N
+        MIAbout.setText("About");
+        MHelp.add(MIAbout);
+
+        MainMenu.add(MHelp);
 
         setJMenuBar(MainMenu);
 
@@ -140,23 +243,120 @@ public class Main extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+            .addComponent(MyToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(mySplit, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+            .addComponent(StatusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 438, Short.MAX_VALUE))
+                .addComponent(MyToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(mySplit, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(StatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    private void CustomizeUI(){
+        // Set the left side panel width to static when frame resized
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                mySplit.setDividerLocation(200);
+            }
+        });
+        
+        // Set padding the split pane
+        TabPanels.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        RightContentPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        myTree.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        PanelExplorerProject.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        
+        // Choose project directory
+        if (projectFolder == null) {
+            JFileChooser chooser;
+            String choosertitle = "Choose a Root Project Directory";
+            chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new java.io.File("."));
+            chooser.setDialogTitle(choosertitle);
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
+                //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
+                projectFolder = chooser.getSelectedFile().getAbsolutePath();
+            } else {
+                projectFolder = "D:\\College\\Semester 8\\Skripsi\\CoFuD";
+            }
+            
+            // Set JTree directory browser
+            File file = new File("D:\\College\\Semester 8\\Skripsi\\CoFuD");
+            rootNode = new DefaultMutableTreeNode(file.getAbsolutePath());
+            treeModel = new DefaultTreeModel(rootNode);
+            myTree.setModel(treeModel);
+            JTree.DynamicUtilTreeNode.createChildren(rootNode, getFileDirectory(file));
+            flattenSplitPane(mySplit);
 
+            // Set sub icon JTree
+            Icon srcIcon = new ImageIcon(getClass().getResource("/assets/file_extension_jar.png"));
+            myTree.setCellRenderer(new DefaultTreeCellRenderer(){
+                @Override
+                public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean sel,
+                        boolean expanded, boolean leaf, int row, boolean hasFocus){
+                    JLabel label = (JLabel)super.getTreeCellRendererComponent(tree, value, sel, 
+                            expanded, leaf, row, hasFocus);  
+                  if(((DefaultMutableTreeNode)value).isRoot())
+                      label.setIcon(new ImageIcon(getClass().getResource("/assets/application.png")));
+                  return label;  
+                } 
+            });
+            DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) myTree.getCellRenderer();
+            renderer.setLeafIcon(srcIcon);
+        }
+        
+        // Create top border the status panel
+        StatusPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.GRAY));
+    }
+    
+    private static MyVector getFileDirectory(File directory) {
+        MyVector vectorDirectory = new MyVector(directory.getName());
+        File[] files = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                String name = pathname.getName().toLowerCase();
+                return name.endsWith(".java") || (pathname.isDirectory() && !("System Volume Information".equalsIgnoreCase(name)));
+            }
+        });
+        for (File file : files) {
+            if(file.isDirectory()) {
+                MyVector vector = getFileDirectory(file);
+                vectorDirectory.add(vector);
+            } else {
+                vectorDirectory.add(file.getName());
+            }
+        }
+        return vectorDirectory;
+    }
+    
+    private static void flattenSplitPane(JSplitPane jSplitPane) {
+        jSplitPane.setUI(new BasicSplitPaneUI() {
+            @Override
+            public BasicSplitPaneDivider createDefaultDivider() {
+                return new BasicSplitPaneDivider(this) {
+                    @Override
+                    public void setBorder(Border b) {
+                    }
+                };
+            }
+        });
+        jSplitPane.setBorder(null);
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -186,33 +386,43 @@ public class Main extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new Main().setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu MFile;
+    private javax.swing.JMenu MHelp;
+    private javax.swing.JMenuItem MIAbout;
+    private javax.swing.JMenuItem MICheckUpdate;
+    private javax.swing.JMenuItem MICloseProject;
+    private javax.swing.JMenuItem MIExit;
+    private javax.swing.JMenuItem MIGenDocs;
+    private javax.swing.JMenuItem MILoadProject;
+    private javax.swing.JMenuItem MIParseFile;
+    private javax.swing.JMenuItem MIParseTranslate;
+    private javax.swing.JMenuItem MIRunProject;
+    private javax.swing.JMenuItem MISaveAs;
+    private javax.swing.JMenuItem MISaveProject;
+    private javax.swing.JMenu MProject;
+    private javax.swing.JPopupMenu.Separator MSepExit;
+    private javax.swing.JPopupMenu.Separator MSepFile;
+    private javax.swing.JPopupMenu.Separator MSepProject;
     private javax.swing.JMenuBar MainMenu;
-    private javax.swing.JMenu ProjectMenu;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem10;
-    private javax.swing.JMenuItem jMenuItem11;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
-    private javax.swing.JMenuItem jMenuItem5;
-    private javax.swing.JMenuItem jMenuItem6;
-    private javax.swing.JMenuItem jMenuItem7;
-    private javax.swing.JMenuItem jMenuItem8;
-    private javax.swing.JMenuItem jMenuItem9;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JToggleButton jToggleButton1;
-    private javax.swing.JToggleButton jToggleButton2;
-    private javax.swing.JToggleButton jToggleButton3;
-    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JToolBar MyToolbar;
+    private javax.swing.JPanel PanelExplorerProject;
+    private javax.swing.JPanel PanelRecentProject;
+    private javax.swing.JPanel RightContentPane;
+    private javax.swing.JPanel StatusPanel;
+    private javax.swing.JToggleButton TOpenProject;
+    private javax.swing.JToggleButton TRunProject;
+    private javax.swing.JToggleButton TSaveProject;
+    private javax.swing.JTabbedPane TabPanels;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JSplitPane mySplit;
+    private javax.swing.JTree myTree;
+    private javax.swing.JScrollPane treeScrollPane;
     // End of variables declaration//GEN-END:variables
 }
