@@ -10,6 +10,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileFilter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -97,10 +99,16 @@ public class Main extends javax.swing.JFrame {
         TOpenProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         TOpenProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
         TOpenProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        TOpenProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TOpenProjectActionPerformed(evt);
+            }
+        });
         MyToolbar.add(TOpenProject);
 
         TRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc_big.png"))); // NOI18N
         TRunProject.setToolTipText("Generate Docs");
+        TRunProject.setEnabled(false);
         TRunProject.setFocusable(false);
         TRunProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         TRunProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
@@ -109,6 +117,7 @@ public class Main extends javax.swing.JFrame {
 
         TSaveProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as big.png"))); // NOI18N
         TSaveProject.setToolTipText("Save Project As");
+        TSaveProject.setEnabled(false);
         TSaveProject.setFocusable(false);
         TSaveProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         TSaveProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
@@ -118,6 +127,8 @@ public class Main extends javax.swing.JFrame {
         mySplit.setBorder(null);
         mySplit.setDividerLocation(230);
 
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
+        myTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         treeScrollPane.setViewportView(myTree);
 
         javax.swing.GroupLayout PanelExplorerProjectLayout = new javax.swing.GroupLayout(PanelExplorerProject);
@@ -186,10 +197,16 @@ public class Main extends javax.swing.JFrame {
 
         MILoadProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/load_project.png"))); // NOI18N
         MILoadProject.setText("Load Project");
+        MILoadProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MILoadProjectActionPerformed(evt);
+            }
+        });
         MProject.add(MILoadProject);
 
         MIRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/run_project.png"))); // NOI18N
         MIRunProject.setText("Run Project");
+        MIRunProject.setEnabled(false);
         MProject.add(MIRunProject);
         MProject.add(MSepProject);
 
@@ -197,31 +214,47 @@ public class Main extends javax.swing.JFrame {
 
         MIParseFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/parse_file.png"))); // NOI18N
         MIParseFile.setText("Parse File");
+        MIParseFile.setEnabled(false);
         MFile.add(MIParseFile);
 
         MIParseTranslate.setText("Parse & Translate");
+        MIParseTranslate.setEnabled(false);
         MFile.add(MIParseTranslate);
 
         MProject.add(MFile);
 
         MISaveAs.setText("Save File As");
+        MISaveAs.setEnabled(false);
         MProject.add(MISaveAs);
         MProject.add(MSepFile);
 
         MIGenDocs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
         MIGenDocs.setText("Generate Docs");
+        MIGenDocs.setEnabled(false);
         MProject.add(MIGenDocs);
 
         MISaveProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as.png"))); // NOI18N
         MISaveProject.setText("Save Project As");
+        MISaveProject.setEnabled(false);
         MProject.add(MISaveProject);
 
         MICloseProject.setText("Close Project");
+        MICloseProject.setEnabled(false);
+        MICloseProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MICloseProjectActionPerformed(evt);
+            }
+        });
         MProject.add(MICloseProject);
         MProject.add(MSepExit);
 
         MIExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/exit.png"))); // NOI18N
         MIExit.setText("Exit");
+        MIExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MIExitActionPerformed(evt);
+            }
+        });
         MProject.add(MIExit);
 
         MainMenu.add(MProject);
@@ -244,7 +277,7 @@ public class Main extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(MyToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(mySplit, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+            .addComponent(mySplit)
             .addComponent(StatusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -262,45 +295,27 @@ public class Main extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void CustomizeUI(){
-        // Set the left side panel width to static when frame resized
-        this.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                mySplit.setDividerLocation(200);
-            }
-        });
-        
-        // Set padding the split pane
-        TabPanels.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        RightContentPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        myTree.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        PanelExplorerProject.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        
-        // Choose project directory
-        if (projectFolder == null) {
-            JFileChooser chooser;
-            String choosertitle = "Choose a Root Project Directory";
-            chooser = new JFileChooser();
-            chooser.setCurrentDirectory(new java.io.File("."));
-            chooser.setDialogTitle(choosertitle);
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setAcceptAllFileFilterUsed(false);
-            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-                //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
-                projectFolder = chooser.getSelectedFile().getAbsolutePath();
-            } else {
-                projectFolder = "D:\\College\\Semester 8\\Skripsi\\CoFuD";
-            }
+    private void MILoadProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MILoadProjectActionPerformed
+        // TODO add your handling code here:
+        JFileChooser chooser;
+        String choosertitle = "Choose a Root Project Directory";
+        chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setDialogTitle(choosertitle);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
+            //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
+            projectFolder = chooser.getSelectedFile().getAbsolutePath();
             
             // Set JTree directory browser
-            File file = new File("D:\\College\\Semester 8\\Skripsi\\CoFuD");
+            myTree.setRootVisible(true);
+            File file = new File(projectFolder);
             rootNode = new DefaultMutableTreeNode(file.getAbsolutePath());
             treeModel = new DefaultTreeModel(rootNode);
             myTree.setModel(treeModel);
             JTree.DynamicUtilTreeNode.createChildren(rootNode, getFileDirectory(file));
-            flattenSplitPane(mySplit);
 
             // Set sub icon JTree
             Icon srcIcon = new ImageIcon(getClass().getResource("/assets/file_extension_jar.png"));
@@ -317,12 +332,66 @@ public class Main extends javax.swing.JFrame {
             });
             DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) myTree.getCellRenderer();
             renderer.setLeafIcon(srcIcon);
+            
+            enableMenuItems(true);
         }
+    }//GEN-LAST:event_MILoadProjectActionPerformed
+
+    private void TOpenProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TOpenProjectActionPerformed
+        // TODO add your handling code here:
+        MILoadProjectActionPerformed(evt);
+    }//GEN-LAST:event_TOpenProjectActionPerformed
+
+    private void MIExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIExitActionPerformed
+        // TODO add your handling code here:
+        try {            
+            Thread.sleep(200);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.exit(1);
+    }//GEN-LAST:event_MIExitActionPerformed
+
+    private void MICloseProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MICloseProjectActionPerformed
+        // TODO add your handling code here:
+        enableMenuItems(false);
+    }//GEN-LAST:event_MICloseProjectActionPerformed
+
+    /**
+     * Customize GUI :
+     * Set root node of the tree disappear if no project selected
+     * Set padding the components
+     * Create top border of the status panel (bottom panel)
+     */
+    private void CustomizeUI(){
+        myTree.setRootVisible(false);
+        flattenSplitPane(mySplit);
+        
+        // Set the left side panel width to static when frame resized
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                mySplit.setDividerLocation(200);
+            }
+        });
+        
+        // Set padding the split pane
+        TabPanels.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        RightContentPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        MyToolbar.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        myTree.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        PanelExplorerProject.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
         // Create top border the status panel
         StatusPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.GRAY));
     }
     
+    /**
+     * Get list of file from selected project directory
+     * 
+     * @param directory
+     * @return vectorDirectory
+     */
     private static MyVector getFileDirectory(File directory) {
         MyVector vectorDirectory = new MyVector(directory.getName());
         File[] files = directory.listFiles(new FileFilter() {
@@ -343,6 +412,11 @@ public class Main extends javax.swing.JFrame {
         return vectorDirectory;
     }
     
+    /**
+     * Set the divider split pane flatten
+     * 
+     * @param jSplitPane 
+     */
     private static void flattenSplitPane(JSplitPane jSplitPane) {
         jSplitPane.setUI(new BasicSplitPaneUI() {
             @Override
@@ -355,6 +429,24 @@ public class Main extends javax.swing.JFrame {
             }
         });
         jSplitPane.setBorder(null);
+    }
+    
+    /**
+     * Enable / disable components (MenuItem & ToogleButtons)
+     * 
+     * @param enable 
+     */
+    private void enableMenuItems(boolean enable){
+        MIRunProject.setEnabled(enable);
+        MIParseFile.setEnabled(enable);
+        MIParseTranslate.setEnabled(enable);
+        MISaveAs.setEnabled(enable);
+        MIGenDocs.setEnabled(enable);
+        MISaveProject.setEnabled(enable);
+        MICloseProject.setEnabled(enable);
+        
+        TRunProject.setEnabled(enable);
+        TSaveProject.setEnabled(enable);
     }
     
     /**
