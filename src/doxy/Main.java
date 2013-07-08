@@ -4,12 +4,18 @@
  */
 package doxy;
 
+import global.DoxyApp;
+import global.MyVector;
+import kit.FileKit;
+import kit.UIKit;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
-import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -17,11 +23,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JSplitPane;
 import javax.swing.JTree;
-import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicSplitPaneDivider;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -35,6 +37,7 @@ public class Main extends javax.swing.JFrame {
     private String projectFolder;
     private DefaultMutableTreeNode rootNode;
     private DefaultTreeModel treeModel;
+    private MyVector myVector;
     
     /**
      * Creates new form Main
@@ -57,14 +60,16 @@ public class Main extends javax.swing.JFrame {
         TOpenProject = new javax.swing.JToggleButton();
         TRunProject = new javax.swing.JToggleButton();
         TSaveProject = new javax.swing.JToggleButton();
-        mySplit = new javax.swing.JSplitPane();
-        TabPanels = new javax.swing.JTabbedPane();
-        PanelExplorerProject = new javax.swing.JPanel();
-        treeScrollPane = new javax.swing.JScrollPane();
-        myTree = new javax.swing.JTree();
-        PanelRecentProject = new javax.swing.JPanel();
-        RightContentPane = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        MySplit = new javax.swing.JSplitPane();
+        LeftSide = new javax.swing.JTabbedPane();
+        TabExplorerProject = new javax.swing.JPanel();
+        TreeScroll = new javax.swing.JScrollPane();
+        MyTree = new javax.swing.JTree();
+        TabRecentProject = new javax.swing.JPanel();
+        RecentScroll = new javax.swing.JScrollPane();
+        ListRecentProjects = new javax.swing.JList();
+        RightSide = new javax.swing.JPanel();
+        MyDesktopPane = new javax.swing.JDesktopPane();
         StatusPanel = new javax.swing.JPanel();
         MainMenu = new javax.swing.JMenuBar();
         MProject = new javax.swing.JMenu();
@@ -124,61 +129,56 @@ public class Main extends javax.swing.JFrame {
         TSaveProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         MyToolbar.add(TSaveProject);
 
-        mySplit.setBorder(null);
-        mySplit.setDividerLocation(230);
+        MySplit.setBorder(null);
+        MySplit.setDividerLocation(230);
+        MySplit.setDividerSize(3);
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
-        myTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        treeScrollPane.setViewportView(myTree);
+        MyTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        TreeScroll.setViewportView(MyTree);
 
-        javax.swing.GroupLayout PanelExplorerProjectLayout = new javax.swing.GroupLayout(PanelExplorerProject);
-        PanelExplorerProject.setLayout(PanelExplorerProjectLayout);
-        PanelExplorerProjectLayout.setHorizontalGroup(
-            PanelExplorerProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(treeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+        javax.swing.GroupLayout TabExplorerProjectLayout = new javax.swing.GroupLayout(TabExplorerProject);
+        TabExplorerProject.setLayout(TabExplorerProjectLayout);
+        TabExplorerProjectLayout.setHorizontalGroup(
+            TabExplorerProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(TreeScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
         );
-        PanelExplorerProjectLayout.setVerticalGroup(
-            PanelExplorerProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(treeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
-        );
-
-        TabPanels.addTab("Project Explorer", PanelExplorerProject);
-
-        javax.swing.GroupLayout PanelRecentProjectLayout = new javax.swing.GroupLayout(PanelRecentProject);
-        PanelRecentProject.setLayout(PanelRecentProjectLayout);
-        PanelRecentProjectLayout.setHorizontalGroup(
-            PanelRecentProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 225, Short.MAX_VALUE)
-        );
-        PanelRecentProjectLayout.setVerticalGroup(
-            PanelRecentProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 419, Short.MAX_VALUE)
+        TabExplorerProjectLayout.setVerticalGroup(
+            TabExplorerProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(TreeScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
         );
 
-        TabPanels.addTab("Recent Projects", PanelRecentProject);
+        LeftSide.addTab("Project Explorer", TabExplorerProject);
 
-        mySplit.setLeftComponent(TabPanels);
+        RecentScroll.setViewportView(ListRecentProjects);
 
-        jLabel1.setText("...");
-
-        javax.swing.GroupLayout RightContentPaneLayout = new javax.swing.GroupLayout(RightContentPane);
-        RightContentPane.setLayout(RightContentPaneLayout);
-        RightContentPaneLayout.setHorizontalGroup(
-            RightContentPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(RightContentPaneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(543, Short.MAX_VALUE))
+        javax.swing.GroupLayout TabRecentProjectLayout = new javax.swing.GroupLayout(TabRecentProject);
+        TabRecentProject.setLayout(TabRecentProjectLayout);
+        TabRecentProjectLayout.setHorizontalGroup(
+            TabRecentProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(RecentScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
         );
-        RightContentPaneLayout.setVerticalGroup(
-            RightContentPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(RightContentPaneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(422, Short.MAX_VALUE))
+        TabRecentProjectLayout.setVerticalGroup(
+            TabRecentProjectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(RecentScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
         );
 
-        mySplit.setRightComponent(RightContentPane);
+        LeftSide.addTab("Recent Projects", TabRecentProject);
+
+        MySplit.setLeftComponent(LeftSide);
+
+        javax.swing.GroupLayout RightSideLayout = new javax.swing.GroupLayout(RightSide);
+        RightSide.setLayout(RightSideLayout);
+        RightSideLayout.setHorizontalGroup(
+            RightSideLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(MyDesktopPane, javax.swing.GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
+        );
+        RightSideLayout.setVerticalGroup(
+            RightSideLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(MyDesktopPane, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE)
+        );
+
+        MySplit.setRightComponent(RightSide);
 
         StatusPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -207,6 +207,11 @@ public class Main extends javax.swing.JFrame {
         MIRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/run_project.png"))); // NOI18N
         MIRunProject.setText("Run Project");
         MIRunProject.setEnabled(false);
+        MIRunProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MIRunProjectActionPerformed(evt);
+            }
+        });
         MProject.add(MIRunProject);
         MProject.add(MSepProject);
 
@@ -277,7 +282,7 @@ public class Main extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(MyToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(mySplit)
+            .addComponent(MySplit)
             .addComponent(StatusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -285,7 +290,7 @@ public class Main extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(MyToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mySplit, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(MySplit, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(StatusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
@@ -308,18 +313,20 @@ public class Main extends javax.swing.JFrame {
             //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
             //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
             projectFolder = chooser.getSelectedFile().getAbsolutePath();
+            DoxyApp.workPath = projectFolder;
             
             // Set JTree directory browser
-            myTree.setRootVisible(true);
+            MyTree.setRootVisible(true);
             File file = new File(projectFolder);
             rootNode = new DefaultMutableTreeNode(file.getAbsolutePath());
             treeModel = new DefaultTreeModel(rootNode);
-            myTree.setModel(treeModel);
-            JTree.DynamicUtilTreeNode.createChildren(rootNode, getFileDirectory(file));
+            MyTree.setModel(treeModel);
+            myVector = FileKit.getFileDirectory(file);
+            JTree.DynamicUtilTreeNode.createChildren(rootNode, myVector);
 
             // Set sub icon JTree
             Icon srcIcon = new ImageIcon(getClass().getResource("/assets/file_extension_jar.png"));
-            myTree.setCellRenderer(new DefaultTreeCellRenderer(){
+            MyTree.setCellRenderer(new DefaultTreeCellRenderer(){
                 @Override
                 public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean sel,
                         boolean expanded, boolean leaf, int row, boolean hasFocus){
@@ -330,7 +337,7 @@ public class Main extends javax.swing.JFrame {
                   return label;  
                 } 
             });
-            DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) myTree.getCellRenderer();
+            DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) MyTree.getCellRenderer();
             renderer.setLeafIcon(srcIcon);
             
             enableMenuItems(true);
@@ -357,6 +364,15 @@ public class Main extends javax.swing.JFrame {
         enableMenuItems(false);
     }//GEN-LAST:event_MICloseProjectActionPerformed
 
+    private void MIRunProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIRunProjectActionPerformed
+        // TODO add your handling code here:
+        List<String> javaFiles = new ArrayList<String>();
+        javaFiles = DoxyApp.bridge.getListJavaSrc();
+        for(String srcJava : javaFiles) {
+            
+        }
+    }//GEN-LAST:event_MIRunProjectActionPerformed
+
     /**
      * Customize GUI :
      * Set root node of the tree disappear if no project selected
@@ -364,71 +380,29 @@ public class Main extends javax.swing.JFrame {
      * Create top border of the status panel (bottom panel)
      */
     private void CustomizeUI(){
-        myTree.setRootVisible(false);
-        flattenSplitPane(mySplit);
+        MyTree.setRootVisible(false);
+        UIKit.flattenSplitPane(MySplit);
         
         // Set the left side panel width to static when frame resized
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                mySplit.setDividerLocation(200);
+                MySplit.setDividerLocation(200);
             }
         });
         
         // Set padding the split pane
-        TabPanels.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        RightContentPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        LeftSide.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 0));
+        RightSide.setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 3));
+        MyDesktopPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         MyToolbar.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        myTree.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        PanelExplorerProject.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        ListRecentProjects.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        RecentScroll.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        MyTree.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        TabExplorerProject.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
         // Create top border the status panel
         StatusPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.GRAY));
-    }
-    
-    /**
-     * Get list of file from selected project directory
-     * 
-     * @param directory
-     * @return vectorDirectory
-     */
-    private static MyVector getFileDirectory(File directory) {
-        MyVector vectorDirectory = new MyVector(directory.getName());
-        File[] files = directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                String name = pathname.getName().toLowerCase();
-                return name.endsWith(".java") || (pathname.isDirectory() && !("System Volume Information".equalsIgnoreCase(name)));
-            }
-        });
-        for (File file : files) {
-            if(file.isDirectory()) {
-                MyVector vector = getFileDirectory(file);
-                vectorDirectory.add(vector);
-            } else {
-                vectorDirectory.add(file.getName());
-            }
-        }
-        return vectorDirectory;
-    }
-    
-    /**
-     * Set the divider split pane flatten
-     * 
-     * @param jSplitPane 
-     */
-    private static void flattenSplitPane(JSplitPane jSplitPane) {
-        jSplitPane.setUI(new BasicSplitPaneUI() {
-            @Override
-            public BasicSplitPaneDivider createDefaultDivider() {
-                return new BasicSplitPaneDivider(this) {
-                    @Override
-                    public void setBorder(Border b) {
-                    }
-                };
-            }
-        });
-        jSplitPane.setBorder(null);
     }
     
     /**
@@ -485,6 +459,8 @@ public class Main extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTabbedPane LeftSide;
+    private javax.swing.JList ListRecentProjects;
     private javax.swing.JMenu MFile;
     private javax.swing.JMenu MHelp;
     private javax.swing.JMenuItem MIAbout;
@@ -503,18 +479,18 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator MSepFile;
     private javax.swing.JPopupMenu.Separator MSepProject;
     private javax.swing.JMenuBar MainMenu;
+    private javax.swing.JDesktopPane MyDesktopPane;
+    private javax.swing.JSplitPane MySplit;
     private javax.swing.JToolBar MyToolbar;
-    private javax.swing.JPanel PanelExplorerProject;
-    private javax.swing.JPanel PanelRecentProject;
-    private javax.swing.JPanel RightContentPane;
+    private javax.swing.JTree MyTree;
+    private javax.swing.JScrollPane RecentScroll;
+    private javax.swing.JPanel RightSide;
     private javax.swing.JPanel StatusPanel;
     private javax.swing.JToggleButton TOpenProject;
     private javax.swing.JToggleButton TRunProject;
     private javax.swing.JToggleButton TSaveProject;
-    private javax.swing.JTabbedPane TabPanels;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JSplitPane mySplit;
-    private javax.swing.JTree myTree;
-    private javax.swing.JScrollPane treeScrollPane;
+    private javax.swing.JPanel TabExplorerProject;
+    private javax.swing.JPanel TabRecentProject;
+    private javax.swing.JScrollPane TreeScroll;
     // End of variables declaration//GEN-END:variables
 }
