@@ -62,12 +62,6 @@
                 </MenuItem>
               </SubComponents>
             </Menu>
-            <MenuItem class="javax.swing.JMenuItem" name="MISaveAs">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Save File As"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="MSepFile">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="MIGenDocs">

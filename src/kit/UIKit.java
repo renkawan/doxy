@@ -15,7 +15,7 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
  */
 public class UIKit {
     /**
-     * Set the divider split pane flatten
+     * Set the divider split pane flat
      * 
      * @param jSplitPane 
      */
@@ -25,8 +25,7 @@ public class UIKit {
             public BasicSplitPaneDivider createDefaultDivider() {
                 return new BasicSplitPaneDivider(this) {
                     @Override
-                    public void setBorder(Border b) {
-                    }
+                    public void setBorder(Border b) { }
                 };
             }
         });
