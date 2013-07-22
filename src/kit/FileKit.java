@@ -13,6 +13,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  *
@@ -58,7 +63,7 @@ public class FileKit {
             FileInputStream fis = new FileInputStream(src);
             BufferedReader buffer = new BufferedReader(new InputStreamReader(fis));
             StringBuilder text = new StringBuilder((int)src.length());
-            String line = null;
+            String line;
             while((line = buffer.readLine()) != null) {
                 text.append(line).append("\n");
                 DoxyApp.bridge.addLineOfCode();
@@ -81,12 +86,15 @@ public class FileKit {
      * @return 
      */
     public static int getNumbLine(int offset, String[] contents) {
+        int lastLine = DoxyApp.bridge.getLastLine();
         int temp = 0;
-        int i = 0;
-        for(i=0;i<contents.length;i++) {
+        if (lastLine > 0) temp = offset;        
+        for(int i=DoxyApp.bridge.getLastLine();i<contents.length;i++) {
             temp = temp + contents[i].length() + 1;
-            if (temp>=offset)
+            if (temp>=offset) {
+                DoxyApp.bridge.setLastLine(i);
                 return i+1;
+            }
         }
         return offset;
     }
@@ -94,5 +102,15 @@ public class FileKit {
     public static String getFileName(String full_path) {
         String[] explode = full_path.replace("\\", "/").split("/");
         return explode[explode.length-1];
+    }
+    
+    public static List<String> readTextFile(String aFileName) throws IOException {
+        Path path = Paths.get(aFileName);
+        return Files.readAllLines(path, StandardCharsets.UTF_8);
+    }
+  
+    public static void writeTextFile(List<String> aLines, String aFileName) throws IOException {
+        Path path = Paths.get(aFileName);
+        Files.write(path, aLines, StandardCharsets.UTF_8);
     }
 }

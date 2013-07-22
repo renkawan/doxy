@@ -5,18 +5,22 @@
 package doxy;
 
 import global.DoxyApp;
+import java.awt.Color;
+import java.awt.Paint;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
 import kit.FileKit;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PiePlot3D;
-import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.general.PieDataset;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.util.Rotation;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 /**
  *
@@ -33,8 +37,12 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
      */
     public FrmParseFile() {
         initComponents();
-        splitSource();
-        createGraph();
+        if (DoxyApp.bridge.getSelectedSrcFile()==null) {
+            JOptionPane.showMessageDialog(null, "Please choose a file first", "Choose file", JOptionPane.WARNING_MESSAGE);
+        } else {
+            splitSource();
+            createGraph();
+        }
     }
 
     /**
@@ -86,39 +94,73 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
         
         CommentsSection.setText(sb_cm.toString());
         MethodsSection.setText(sb_fn.toString());
+        
+        // Reset visited last line from selected source code file
+        DoxyApp.bridge.setLastLine(0);
     }
     
     /**
      * Create summary graph from selected source
      */
     private void createGraph() {
-        PieDataset dataset = createDataset();
-        JFreeChart chart = createPieChart(dataset, "Source Graph Summary");
+        CategoryDataset dataset = createBarDataset();
+        JFreeChart chart = createBarChart(dataset, "Source Graph Summary");
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(575, 405));
         ParseGraph.setLayout(new BoxLayout(ParseGraph, BoxLayout.LINE_AXIS));
         ParseGraph.add(chartPanel);
     }
     
-    private PieDataset createDataset() {
-        DefaultPieDataset result = new DefaultPieDataset();
-        result.setValue("LOC", total_partcode[0]);
-        result.setValue("Empty Line", total_partcode[1]);
-        result.setValue("Comments", total_partcode[2]);
-        result.setValue("Effective", total_partcode[3]);
+    private CategoryDataset createBarDataset() {
+        DefaultCategoryDataset result = new DefaultCategoryDataset();
+        result.addValue(total_partcode[2], "Total", "Comment");
+        result.addValue(total_partcode[1], "Total", "Empty Line");
+        result.addValue(total_partcode[3], "Total", "Effective Line");
+        result.addValue(total_partcode[0], "Total", "Line Of Code");
         return result;
     }
     
-    private JFreeChart createPieChart(PieDataset dataset, String title) {
-        JFreeChart chart = ChartFactory.createPieChart3D(title, dataset, true, true, false);
-        PiePlot3D plot = (PiePlot3D) chart.getPlot();
-        plot.setStartAngle(290);
-        plot.setDirection(Rotation.CLOCKWISE);
-        plot.setForegroundAlpha(0.5f);
+    private JFreeChart createBarChart(CategoryDataset dataset, String title) {
+        JFreeChart chart = ChartFactory.createBarChart(title, "Source Code Components", "Total", dataset, PlotOrientation.VERTICAL, false, true, false);
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setRangeGridlinePaint(Color.WHITE);
+        plot.setDomainGridlinePaint(Color.BLACK);
+        final CategoryItemRenderer renderer = new CustomRenderer(
+            new Paint[] {Color.orange, Color.magenta, Color.yellow, Color.red}
+        );
+        plot.setRenderer(renderer);
         chart.getTitle().setPadding(5, 5, 5, 5);
         chart.getTitle().setFont(new java.awt.Font("Tahoma", 1, 16));
-        plot.setLabelPadding(new RectangleInsets(4, 4, 4, 4));
-        return chart;        
+        return chart;
+    }
+    
+    class CustomRenderer extends BarRenderer {
+
+        /** The colors. */
+        private Paint[] colors;
+
+        /**
+         * Creates a new renderer.
+         *
+         * @param colors  the colors.
+         */
+        public CustomRenderer(final Paint[] colors) {
+            this.colors = colors;
+        }
+
+        /**
+         * Returns the paint for an item.  Overrides the default behaviour inherited from
+         * AbstractSeriesRenderer.
+         *
+         * @param row  the series.
+         * @param column  the category.
+         *
+         * @return The item color.
+         */
+        @Override
+        public Paint getItemPaint(final int row, final int column) {
+            return this.colors[column % this.colors.length];
+        }
     }
     /**
      * This method is called from within the constructor to initialize the form.
