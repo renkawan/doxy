@@ -4,6 +4,7 @@
  */
 package global;
 
+import japa.parser.ast.CompilationUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -17,6 +18,8 @@ public class Bridge {
     private MyVector listSources;
     private String selectedSrcFile;
     private int totalLineOfCode;
+    private int lastLineVisited;
+    private CompilationUnit translatedFile;
     
     public void setWorkPath(String path){
         DoxyApp.workPath = path;
@@ -55,5 +58,11 @@ public class Bridge {
     }
     public int getCommentsLine(String comment) {
         return countLineOfComments(comment);
+    }
+    public void setLastLine(int line) {
+        lastLineVisited = line;
+    }
+    public int getLastLine() {
+        return lastLineVisited;
     }
 }

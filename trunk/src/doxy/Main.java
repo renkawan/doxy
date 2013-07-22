@@ -15,9 +15,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -41,13 +44,21 @@ public class Main extends javax.swing.JFrame {
     private DefaultMutableTreeNode rootNode;
     private DefaultTreeModel treeModel;
     private MyVector myVector;
+    private List<String> recentProjects = new ArrayList<>();
+    private String recentFile;
     
     /**
      * Creates new form Main
      */
     public Main() {
         initComponents();
+        
+        recentFile = getClass().getResource("/global/recent.txt").getPath();
+        recentFile = recentFile.substring(1);
+        recentFile = recentFile.replace("%20", " ");
+        
         CustomizeUI();
+        getRecentItems();
     }
 
     /**
@@ -159,6 +170,11 @@ public class Main extends javax.swing.JFrame {
 
         LeftSide.addTab("Project Explorer", TabExplorerProject);
 
+        ListRecentProjects.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ListRecentProjectsMouseClicked(evt);
+            }
+        });
         RecentScroll.setViewportView(ListRecentProjects);
 
         javax.swing.GroupLayout TabRecentProjectLayout = new javax.swing.GroupLayout(TabRecentProject);
@@ -337,35 +353,7 @@ public class Main extends javax.swing.JFrame {
             //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
             //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
             projectFolder = chooser.getSelectedFile().getAbsolutePath();
-            DoxyApp.workPath = projectFolder;
-            
-            // Set JTree directory browser
-            MyTree.setRootVisible(true);
-            File file = new File(projectFolder);
-            rootNode = new DefaultMutableTreeNode(file.getAbsolutePath());
-            treeModel = new DefaultTreeModel(rootNode);
-            MyTree.setModel(treeModel);
-            myVector = FileKit.getFileDirectory(file);
-            JTree.DynamicUtilTreeNode.createChildren(rootNode, myVector);
-
-            // Set sub icon JTree
-            Icon srcIcon = new ImageIcon(getClass().getResource("/assets/file_extension_jar.png"));
-            MyTree.setCellRenderer(new DefaultTreeCellRenderer(){
-                @Override
-                public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean sel,
-                        boolean expanded, boolean leaf, int row, boolean hasFocus){
-                    JLabel label = (JLabel)super.getTreeCellRendererComponent(tree, value, sel, 
-                            expanded, leaf, row, hasFocus);  
-                  if(((DefaultMutableTreeNode)value).isRoot())
-                      label.setIcon(new ImageIcon(getClass().getResource("/assets/application.png")));
-                  return label;  
-                } 
-            });
-            DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) MyTree.getCellRenderer();
-            renderer.setLeafIcon(srcIcon);
-            MyTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-            
-            enableMenuItems(true);
+            drawSrcTree();
         }
     }//GEN-LAST:event_MILoadProjectActionPerformed
 
@@ -404,8 +392,6 @@ public class Main extends javax.swing.JFrame {
         if(DoxyApp.bridge.getSelectedSrcFile()==null) {
             FrmSrcList frameSrc = new FrmSrcList(this, true);
             frameSrc.setVisible(true);
-        } else {
-            
         }
         
         FrmParseFile frmParse = new FrmParseFile();
@@ -443,7 +429,36 @@ public class Main extends javax.swing.JFrame {
 
     private void MIParseTranslateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIParseTranslateActionPerformed
         // TODO add your handling code here:
+        clearDesktopPane();
+        if(DoxyApp.bridge.getSelectedSrcFile()==null) {
+            FrmSrcList frameSrc = new FrmSrcList(this, true);
+            frameSrc.setVisible(true);
+        }
+        
+        try {
+            FrmParseTranslate frmParse = new FrmParseTranslate();
+            MyDesktopPane.add(frmParse);
+            frmParse.setVisible(true);
+            frmParse.setBorder(null);
+            try {
+                frmParse.setMaximum(true);
+                ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
+            } catch (PropertyVetoException pvx) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_MIParseTranslateActionPerformed
+
+    private void ListRecentProjectsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ListRecentProjectsMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount()==2) {
+            projectFolder = ListRecentProjects.getSelectedValue().toString();
+            drawSrcTree();
+            LeftSide.setSelectedIndex(0);
+        }
+    }//GEN-LAST:event_ListRecentProjectsMouseClicked
 
     /**
      * This method used to recall parse file action
@@ -509,6 +524,75 @@ public class Main extends javax.swing.JFrame {
         
         TRunProject.setEnabled(enable);
         TSaveProject.setEnabled(enable);
+    }
+    
+    private void getRecentItems() {
+        try {
+            recentProjects = FileKit.readTextFile(recentFile);
+            Vector<String> recentItems = new Vector<>();
+            recentItems.addAll(recentProjects);
+            ListRecentProjects.setListData(recentItems);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void addRecentItems() {
+        if(recentProjects.size()==10) {
+            recentProjects.remove(recentProjects.size()-1);
+        }
+        try {
+            List<String> newItem = new ArrayList<>();
+            newItem.add(projectFolder);
+            clearDuplicateRecent();
+            newItem.addAll(recentProjects);
+            FileKit.writeTextFile(newItem, recentFile);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void clearDuplicateRecent() {
+        Iterator<String> itr = recentProjects.iterator();
+        while (itr.hasNext()) {
+            String old = itr.next();
+            if (old.equals(projectFolder)) {
+                itr.remove();
+            }
+        }
+    }
+    
+    private void drawSrcTree() {
+        DoxyApp.workPath = projectFolder;
+            
+        // Set JTree directory browser
+        MyTree.setRootVisible(true);
+        File file = new File(projectFolder);
+        rootNode = new DefaultMutableTreeNode(file.getAbsolutePath());
+        treeModel = new DefaultTreeModel(rootNode);
+        MyTree.setModel(treeModel);
+        myVector = FileKit.getFileDirectory(file);
+        JTree.DynamicUtilTreeNode.createChildren(rootNode, myVector);
+
+        // Set sub icon JTree
+        Icon srcIcon = new ImageIcon(getClass().getResource("/assets/file_extension_jar.png"));
+        MyTree.setCellRenderer(new DefaultTreeCellRenderer(){
+            @Override
+            public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean sel,
+                    boolean expanded, boolean leaf, int row, boolean hasFocus){
+                JLabel label = (JLabel)super.getTreeCellRendererComponent(tree, value, sel, 
+                        expanded, leaf, row, hasFocus);  
+              if(((DefaultMutableTreeNode)value).isRoot())
+                  label.setIcon(new ImageIcon(getClass().getResource("/assets/application.png")));
+              return label;  
+            } 
+        });
+        DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) MyTree.getCellRenderer();
+        renderer.setLeafIcon(srcIcon);
+        MyTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        enableMenuItems(true);
+        addRecentItems();
     }
     
     /**
