@@ -28,6 +28,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -93,7 +94,6 @@ public class Main extends javax.swing.JFrame {
         MFile = new javax.swing.JMenu();
         MIParseFile = new javax.swing.JMenuItem();
         MIParseTranslate = new javax.swing.JMenuItem();
-        MISaveAs = new javax.swing.JMenuItem();
         MSepFile = new javax.swing.JPopupMenu.Separator();
         MIGenDocs = new javax.swing.JMenuItem();
         MISaveProject = new javax.swing.JMenuItem();
@@ -264,10 +264,6 @@ public class Main extends javax.swing.JFrame {
         MFile.add(MIParseTranslate);
 
         MProject.add(MFile);
-
-        MISaveAs.setText("Save File As");
-        MISaveAs.setEnabled(false);
-        MProject.add(MISaveAs);
         MProject.add(MSepFile);
 
         MIGenDocs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
@@ -517,7 +513,6 @@ public class Main extends javax.swing.JFrame {
         MIRunProject.setEnabled(enable);
         MIParseFile.setEnabled(enable);
         MIParseTranslate.setEnabled(enable);
-        MISaveAs.setEnabled(enable);
         MIGenDocs.setEnabled(enable);
         MISaveProject.setEnabled(enable);
         MICloseProject.setEnabled(enable);
@@ -645,7 +640,6 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JMenuItem MIParseFile;
     private javax.swing.JMenuItem MIParseTranslate;
     private javax.swing.JMenuItem MIRunProject;
-    private javax.swing.JMenuItem MISaveAs;
     private javax.swing.JMenuItem MISaveProject;
     private javax.swing.JMenu MProject;
     private javax.swing.JPopupMenu.Separator MSepExit;

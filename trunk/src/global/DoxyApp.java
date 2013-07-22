@@ -14,4 +14,5 @@ public class DoxyApp {
     public final static String rxComment = "/\\*(?>(?:(?>[^*]+)|\\*(?!/))*)\\*/|(//.*)";
     public final static String rxMethod = "\\w+ +\\w+ *\\([^\\)]*\\) *\\{";
     public final static String rxEmptyLine = "^\\s*$";
+    public final static String myServer = "http://localhost/2013/doxy/";
 }
