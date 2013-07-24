@@ -14,6 +14,10 @@ public class MyVector extends Vector{
  
     private String nama;
  
+    /**
+     *
+     * @param nama
+     */
     public MyVector(String nama) {
         this.nama = nama;
     }

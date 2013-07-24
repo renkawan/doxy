@@ -8,6 +8,7 @@ import global.DoxyApp;
 import global.MyVector;
 import java.awt.event.WindowEvent;
 import javax.swing.JOptionPane;
+import kit.UIKit;
 
 /**
  *
@@ -108,7 +109,7 @@ public class FrmSrcList extends javax.swing.JDialog {
 
     private void LoadSrcFiles() {
         MyVector javaFiles = DoxyApp.bridge.getListSources();
-        srcList.setSelectedIndex(1);
+        srcList.setSelectionMode(0);
         srcList.setListData(javaFiles);
     }
     
