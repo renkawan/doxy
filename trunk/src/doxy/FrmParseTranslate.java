@@ -21,7 +21,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import kit.FileKit;
-import kit.ServerKit;
 
 /**
  *
@@ -30,6 +29,7 @@ import kit.ServerKit;
 public class FrmParseTranslate extends javax.swing.JInternalFrame {
     private String selectedFile;
     private CompilationUnit cu;
+    
     /**
      * Creates new form FrmParseTranslate
      */
@@ -42,6 +42,10 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
         }
     }
     
+    /**
+     * Read the source code, extract it then translate the comments
+     * @throws Exception 
+     */
     private void processFile() throws Exception {
         selectedFile = DoxyApp.bridge.getSelectedSrcFile();
         FileInputStream in = new FileInputStream(selectedFile);
@@ -57,27 +61,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
         for (Comment cm : srcComments){
             oriComments.append(cm.toString());
             String [] contents = cm.getContent().split("\r\n");
-            StringBuilder bContent = new StringBuilder();
-            for (int i=0;i<contents.length;i++) {
-                if (contents[i].trim().equals("")) {
-                    if (i!=(contents.length)-1)
-                        bContent.append(contents[i]).append("\r\n");
-                    else
-                        bContent.append(contents[i]);
-                } else {
-                    if (contents[i].trim().equals("*")) {
-                        bContent.append(contents[i]).append("\r\n");
-                    } else {
-                        if (!contents[i].matches("(?i).*@param.*") && !contents[i].matches("(?i).*@return.*")
-                                && !contents[i].matches("(?i).*@author.*")) {
-                            String translated = ServerKit.translateComments(contents[i]);
-                            bContent.append("  ").append(translated).append("\r\n");
-                        } else {
-                            bContent.append(contents[i]).append("\r\n");
-                        }
-                    }
-                }
-            }
+            StringBuilder bContent = FileKit.extractAndTranslate(contents);
             cm.setContent(bContent.toString());
             resComments.append(cm.toString());
             newComments.add(cm);
@@ -87,7 +71,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
         TAResult.setText(resComments.toString());
         LblStatus.setText(FileKit.getFileName(DoxyApp.bridge.getSelectedSrcFile())+" "+LblStatus.getText());
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -101,7 +85,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
         TAOriginal = new javax.swing.JTextArea();
         LblOriginal = new javax.swing.JLabel();
         LblResult = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        SPRes = new javax.swing.JScrollPane();
         TAResult = new javax.swing.JTextArea();
         LblWarning = new javax.swing.JLabel();
         SaveSrcBtn = new javax.swing.JButton();
@@ -120,7 +104,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
 
         TAResult.setColumns(20);
         TAResult.setRows(5);
-        jScrollPane1.setViewportView(TAResult);
+        SPRes.setViewportView(TAResult);
 
         LblWarning.setForeground(new java.awt.Color(255, 0, 0));
         LblWarning.setText("Please make sure if the original source is in english.");
@@ -139,7 +123,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(SPOri, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
-            .addComponent(jScrollPane1)
+            .addComponent(SPRes)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(LblWarning)
@@ -162,7 +146,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(LblResult)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                .addComponent(SPRes, javax.swing.GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SaveSrcBtn)
@@ -204,9 +188,9 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
     private javax.swing.JLabel LblStatus;
     private javax.swing.JLabel LblWarning;
     private javax.swing.JScrollPane SPOri;
+    private javax.swing.JScrollPane SPRes;
     private javax.swing.JButton SaveSrcBtn;
     private javax.swing.JTextArea TAOriginal;
     private javax.swing.JTextArea TAResult;
-    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }

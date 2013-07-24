@@ -18,6 +18,13 @@ import java.net.URLEncoder;
  * @author Rendra
  */
 public class ServerKit {
+    /**
+     * Use for translate comment into Indonesian from English
+     * 
+     * @param comments
+     * @return
+     * @throws IOException
+     */
     public static String translateComments(String comments) throws IOException {
         String result = "";
         String server = DoxyApp.myServer;
