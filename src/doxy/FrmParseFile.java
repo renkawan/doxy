@@ -31,7 +31,7 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
     private int [] total_partcode;
     private int total_empty_lines, total_effectiveln, total_comments_ln;
     private int total_linesofcode;
-        
+    
     /**
      * Creates new form FrmParseFile
      */
@@ -94,6 +94,8 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
         
         CommentsSection.setText(sb_cm.toString());
         MethodsSection.setText(sb_fn.toString());
+        CommentsSection.setCaretPosition(0);
+        MethodsSection.setCaretPosition(0);
         
         // Reset visited last line from selected source code file
         DoxyApp.bridge.setLastLine(0);
@@ -113,15 +115,15 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
     
     private CategoryDataset createBarDataset() {
         DefaultCategoryDataset result = new DefaultCategoryDataset();
-        result.addValue(total_partcode[2], "Total", "Comment");
-        result.addValue(total_partcode[1], "Total", "Empty Line");
-        result.addValue(total_partcode[3], "Total", "Effective Line");
-        result.addValue(total_partcode[0], "Total", "Line Of Code");
+        result.addValue(total_partcode[2], "Total", "Comment "+total_partcode[2]);
+        result.addValue(total_partcode[1], "Total", "Empty Line "+total_partcode[1]);
+        result.addValue(total_partcode[3], "Total", "Effective Line "+total_partcode[3]);
+        result.addValue(total_partcode[0], "Total", "Line Of Code "+total_partcode[0]);
         return result;
     }
     
     private JFreeChart createBarChart(CategoryDataset dataset, String title) {
-        JFreeChart chart = ChartFactory.createBarChart(title, "Source Code Components", "Total", dataset, PlotOrientation.VERTICAL, false, true, false);
+        JFreeChart chart = ChartFactory.createBarChart(title, "Source Code Component", "Total", dataset, PlotOrientation.VERTICAL, false, true, false);
         CategoryPlot plot = chart.getCategoryPlot();
         plot.setRangeGridlinePaint(Color.WHITE);
         plot.setDomainGridlinePaint(Color.BLACK);

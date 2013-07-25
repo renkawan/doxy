@@ -11,6 +11,7 @@ import kit.UIKit;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -24,7 +25,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -41,6 +41,7 @@ import javax.swing.Timer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
@@ -70,6 +71,19 @@ public class Main extends javax.swing.JFrame {
         
         CustomizeUI();
         getRecentItems();
+        
+        // Show about section first
+        FrmAbout frmAbout = new FrmAbout();
+        MyDesktopPane.add(frmAbout);
+        frmAbout.setLayout(new GridBagLayout());
+        frmAbout.setVisible(true);
+        frmAbout.setBorder(null);
+        try {
+            frmAbout.setMaximum(true);
+            ((javax.swing.plaf.basic.BasicInternalFrameUI)frmAbout.getUI()).setNorthPane(null);
+        } catch (PropertyVetoException pvx) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+        }
     }
 
     /**
@@ -143,6 +157,11 @@ public class Main extends javax.swing.JFrame {
         TRunProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         TRunProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
         TRunProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        TRunProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TRunProjectActionPerformed(evt);
+            }
+        });
         MyToolbar.add(TRunProject);
 
         TSaveProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as big.png"))); // NOI18N
@@ -160,9 +179,9 @@ public class Main extends javax.swing.JFrame {
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         MyTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        MyTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                TreeValueChanged(evt);
+        MyTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                MyTreeMouseClicked(evt);
             }
         });
         TreeScroll.setViewportView(MyTree);
@@ -274,7 +293,7 @@ public class Main extends javax.swing.JFrame {
         MProject.add(MSepFile);
 
         MIRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/run_project.png"))); // NOI18N
-        MIRunProject.setText("Run Project");
+        MIRunProject.setText("Translate Project");
         MIRunProject.setEnabled(false);
         MIRunProject.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -284,7 +303,7 @@ public class Main extends javax.swing.JFrame {
         MProject.add(MIRunProject);
 
         MIGenDocs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
-        MIGenDocs.setText("Generate Docs");
+        MIGenDocs.setText("Generate Documentation");
         MIGenDocs.setEnabled(false);
         MIGenDocs.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -313,14 +332,29 @@ public class Main extends javax.swing.JFrame {
         MHelp.setText("Help");
 
         MIHowTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/support.png"))); // NOI18N
-        MIHowTo.setText("How To");
+        MIHowTo.setText("How To Use");
+        MIHowTo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MIHowToActionPerformed(evt);
+            }
+        });
         MHelp.add(MIHowTo);
 
         MICheckUpdate.setText("Check For Update");
+        MICheckUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MICheckUpdateActionPerformed(evt);
+            }
+        });
         MHelp.add(MICheckUpdate);
 
         MIAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/about.png"))); // NOI18N
         MIAbout.setText("About");
+        MIAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MIAboutActionPerformed(evt);
+            }
+        });
         MHelp.add(MIAbout);
 
         MainMenu.add(MHelp);
@@ -362,6 +396,7 @@ public class Main extends javax.swing.JFrame {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
             //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
+            DoxyApp.bridge.setFromRecent(false);
             projectFolder = chooser.getSelectedFile().getAbsolutePath();
             drawSrcTree();
         }
@@ -389,51 +424,28 @@ public class Main extends javax.swing.JFrame {
     private void MIParseFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIParseFileActionPerformed
         // TODO add your handling code here:
         clearDesktopPane();
-        if(DoxyApp.bridge.getSelectedSrcFile()==null) {
-            FrmSrcList frameSrc = new FrmSrcList(this, true);
-            frameSrc.setVisible(true);
-        }
+        FrmSrcList frameSrc = new FrmSrcList(this, true);
+        frameSrc.setVisible(true);
         
-        FrmParseFile frmParse = new FrmParseFile();
-        MyDesktopPane.add(frmParse);
-        frmParse.setVisible(true);
-        frmParse.setBorder(null);
-        try {
-            frmParse.setMaximum(true);
-            ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
-        } catch (PropertyVetoException pvx) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+        if (DoxyApp.bridge.isFileChoosen()) {
+            FrmParseFile frmParse = new FrmParseFile();
+            MyDesktopPane.add(frmParse);
+            frmParse.setVisible(true);
+            frmParse.setBorder(null);
+            try {
+                frmParse.setMaximum(true);
+                ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
+            } catch (PropertyVetoException pvx) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+            }
         }
     }//GEN-LAST:event_MIParseFileActionPerformed
-
-    private void TreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_TreeValueChanged
-        // TODO add your handling code here:
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
-        if (node==null) return;
-        if (node.isLeaf()) {
-            List<String> leafPath = new ArrayList<>();
-            String selectedLeaf = node.toString();
-            String rootLeaf = node.getRoot().toString();
-            while(!node.getParent().toString().equals(rootLeaf)){
-                leafPath.add(node.getParent().toString());
-                node = (DefaultMutableTreeNode) node.getParent();
-            }
-            Collections.reverse(leafPath);
-            String fullPath = leafPath.toString().replace("[", "").replace(" ", "");
-            fullPath = fullPath.replace("]", "");
-            fullPath = fullPath.replace(",", "\\");
-            fullPath = rootLeaf+"\\"+fullPath+"\\"+selectedLeaf;
-            DoxyApp.bridge.setSelectedSrcFile(fullPath);
-        }
-    }//GEN-LAST:event_TreeValueChanged
 
     private void MIParseTranslateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIParseTranslateActionPerformed
         // TODO add your handling code here:
         clearDesktopPane();
-        if(DoxyApp.bridge.getSelectedSrcFile()==null) {
-            FrmSrcList frameSrc = new FrmSrcList(this, true);
-            frameSrc.setVisible(true);
-        }
+        FrmSrcList frameSrc = new FrmSrcList(this, true);
+        frameSrc.setVisible(true);
         
         try {
             FrmParseTranslate frmParse = new FrmParseTranslate();
@@ -455,6 +467,7 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
         if (evt.getClickCount()==2) {
             projectFolder = ListRecentProjects.getSelectedValue().toString();
+            DoxyApp.bridge.setFromRecent(true);
             drawSrcTree();
             LeftSide.setSelectedIndex(0);
         }
@@ -475,7 +488,9 @@ public class Main extends javax.swing.JFrame {
             String[] cmd = {
                 "javadoc", 
                 "-docletpath", DoxyApp.doxletpath, 
-                "-doclet", DoxyApp.doxlet, 
+                "-doclet", DoxyApp.doxlet,
+                "-generatesources",
+                "-paresecomments",
                 "-title", DoxyApp.myAppName, 
                 "-hdf", "project.name", projectName, 
                 "-XDignore.symbol.file", 
@@ -502,6 +517,60 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_MIGenDocsActionPerformed
 
+    private void TRunProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TRunProjectActionPerformed
+        // TODO add your handling code here:
+        MIRunProjectActionPerformed(evt);
+    }//GEN-LAST:event_TRunProjectActionPerformed
+
+    private void MIHowToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIHowToActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_MIHowToActionPerformed
+
+    private void MICheckUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MICheckUpdateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_MICheckUpdateActionPerformed
+
+    private void MIAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIAboutActionPerformed
+        // TODO add your handling code here:
+        clearDesktopPane();
+        FrmAbout frmAbout = new FrmAbout();
+        MyDesktopPane.add(frmAbout);
+        frmAbout.setLayout(new GridBagLayout());
+        frmAbout.setVisible(true);
+        frmAbout.setBorder(null);
+        try {
+            frmAbout.setMaximum(true);
+            ((javax.swing.plaf.basic.BasicInternalFrameUI)frmAbout.getUI()).setNorthPane(null);
+        } catch (PropertyVetoException pvx) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+        }
+    }//GEN-LAST:event_MIAboutActionPerformed
+
+    private void MyTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyTreeMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount()==2) {
+            TreePath tp = MyTree.getPathForLocation(evt.getX(), evt.getY());
+            if (tp != null) {
+                String fullPath = tp.toString().replace("[", "").replace(" ", "");
+                fullPath = fullPath.replace("]", "");
+                fullPath = fullPath.replace(",", "\\");
+                DoxyApp.bridge.setSelectedSrcFile(fullPath);
+                
+                clearDesktopPane();
+                FrmParseFile frmParse = new FrmParseFile();
+                MyDesktopPane.add(frmParse);
+                frmParse.setVisible(true);
+                frmParse.setBorder(null);
+                try {
+                    frmParse.setMaximum(true);
+                    ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
+                } catch (PropertyVetoException pvx) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+                }
+            }
+        }
+    }//GEN-LAST:event_MyTreeMouseClicked
+
     public static void pipeStream(InputStream input, OutputStream output) throws IOException {
         byte buffer[] = new byte[1024];
         int numRead = 0;
@@ -510,14 +579,6 @@ public class Main extends javax.swing.JFrame {
             output.write(buffer, 0, numRead);
         } while (input.available() > 0);
         output.flush();
-    }
-    
-    /**
-     * This method used to recall parse file action
-     * @param evt 
-     */
-    public void RefreshParseFile(java.awt.event.ActionEvent evt) {
-        MIParseFileActionPerformed(evt);
     }
     
     /**
@@ -615,18 +676,20 @@ public class Main extends javax.swing.JFrame {
     }
     
     private void drawSrcTree() {
-        // Backup first
-        // No editting in original project
         String [] splitPath = (projectFolder.replaceAll("\\\\", "/")).split("/");
         projectName = splitPath[splitPath.length-1];
-        File srcDir = new File(projectFolder);
-        File dstDir = new File(baseOutputDir+projectName);
-        try{
-            FileKit.copyFolder(srcDir, dstDir);
-            // Rewrite opened project
-            projectFolder = baseOutputDir+projectName;
-        }catch(IOException e){ }
         
+        if (!DoxyApp.bridge.isFromRecent()) {
+            // Backup first
+            // No editting in original project
+            File srcDir = new File(projectFolder);
+            File dstDir = new File(baseOutputDir+projectName);
+            try{
+                FileKit.copyFolder(srcDir, dstDir);
+                // Rewrite opened project
+                projectFolder = baseOutputDir+projectName;
+            }catch(IOException e){ }
+        }
         DoxyApp.workPath = projectFolder;
             
         // Set JTree directory browser
@@ -656,6 +719,9 @@ public class Main extends javax.swing.JFrame {
         renderer.setLeafIcon(srcIcon);
         MyTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
+        for (int i=0;i<MyTree.getRowCount();i++) {  
+            MyTree.expandRow(i);  
+        } 
         enableMenuItems(true);
         addRecentItems();
     }

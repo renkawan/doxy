@@ -54,7 +54,7 @@ public class FileKit {
     }
     
     /**
-     * Read selected java source file and save into String for further operation     *
+     * Read selected java source file and save into String for further operation
      * @param file_location
      * @return String text
      */
@@ -71,8 +71,8 @@ public class FileKit {
             }
             return text.toString();
         }
-        catch (FileNotFoundException notfound) { return notfound.toString(); }
-        catch (IOException ioex) { return ioex.toString(); }
+        catch (FileNotFoundException notfound) { return "File Not Found"; }
+        catch (IOException ioex) { return "IO Error"; } 
     }
     
     /**

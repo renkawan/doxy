@@ -8,7 +8,6 @@ import global.DoxyApp;
 import global.MyVector;
 import java.awt.event.WindowEvent;
 import javax.swing.JOptionPane;
-import kit.UIKit;
 
 /**
  *
@@ -91,11 +90,10 @@ public class FrmSrcList extends javax.swing.JDialog {
     private void ChooseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChooseBtnActionPerformed
         // TODO add your handling code here:
         choosenFile = (srcList.getSelectedValue().toString().isEmpty()) ? null : srcList.getSelectedValue().toString();
-        if(choosenFile==null) {
+        if (choosenFile==null) {
             JOptionPane.showMessageDialog(null, "Please choose a file first", "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
             DoxyApp.bridge.setSelectedSrcFile(choosenFile);
-            new Main().RefreshParseFile(evt);
             FrmSrcList.this.setVisible(false);
             FrmSrcList.this.dispatchEvent(new WindowEvent(FrmSrcList.this, WindowEvent.WINDOW_CLOSING));
         }
