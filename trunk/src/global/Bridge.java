@@ -18,6 +18,8 @@ public class Bridge {
     private String selectedSrcFile;
     private int totalLineOfCode;
     private int lastLineVisited;
+    private boolean isChoosen = false;
+    private boolean fromRecent = false;
     
     /**
      * Set working directory which used for further analyzing
@@ -75,6 +77,7 @@ public class Bridge {
      * @param file
      */
     public void setSelectedSrcFile(String file) {
+        this.isChoosen = true;
         this.selectedSrcFile = file;
     }
     
@@ -139,5 +142,17 @@ public class Bridge {
      */
     public int getLastLine() {
         return lastLineVisited;
+    }
+    
+    public boolean isFileChoosen() {
+        return isChoosen;
+    }
+    
+    public void setFromRecent(boolean recent) {
+        fromRecent = recent;
+    }
+    
+    public boolean isFromRecent() {
+        return fromRecent;
     }
 }
