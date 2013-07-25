@@ -43,6 +43,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import kit.ServerKit;
 
 /**
  *
@@ -524,6 +525,7 @@ public class Main extends javax.swing.JFrame {
 
     private void MIHowToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIHowToActionPerformed
         // TODO add your handling code here:
+        ServerKit.openURL(DoxyApp.myWiki);
     }//GEN-LAST:event_MIHowToActionPerformed
 
     private void MICheckUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MICheckUpdateActionPerformed
