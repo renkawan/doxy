@@ -41,7 +41,7 @@
                 </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="MIParseTranslate">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Parse &amp; Translate"/>
+                    <Property name="text" type="java.lang.String" value="Translate Comments"/>
                     <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                   <Events>
@@ -64,26 +64,51 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MIRunProjectActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="MIGenDocs">
+            <Menu class="javax.swing.JMenu" name="MGenDocs">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/assets/generate_doc.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Generate Documentation"/>
-                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MIGenDocsActionPerformed"/>
-              </Events>
-            </MenuItem>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="MIIndonesian">
+                  <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/assets/indonesia.png"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Indonesian"/>
+                    <Property name="enabled" type="boolean" value="false"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MIIndonesianActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="MIEnglish">
+                  <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/assets/england.png"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="English"/>
+                    <Property name="enabled" type="boolean" value="false"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MIEnglishActionPerformed"/>
+                  </Events>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
             <MenuItem class="javax.swing.JMenuItem" name="MISaveProject">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/assets/save_as.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Save Project As"/>
+                <Property name="text" type="java.lang.String" value="Save Project"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MISaveProjectActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="MSepExit">
             </MenuItem>
@@ -213,7 +238,7 @@
         <Component class="javax.swing.JToggleButton" name="TRunProject">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/assets/generate_doc_big.png"/>
+              <Image iconType="3" name="/assets/run_project_big.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="Generate Docs"/>
             <Property name="enabled" type="boolean" value="false"/>
@@ -242,6 +267,9 @@
             </Property>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="TSaveProjectActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
