@@ -20,4 +20,5 @@ public class DoxyApp {
     public final static String doxlet = "com.google.doclava.Doclava";
     public static int progressCounter;
     public final static String myAppName = "Doxy";
+    public final static String myVersion = "2.0.1";
 }

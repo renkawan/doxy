@@ -152,7 +152,7 @@ public class FileKit {
                 } else {
                     if (!contents[i].matches("(?i).*@param.*") && !contents[i].matches("(?i).*@return.*")
                             && !contents[i].matches("(?i).*@author.*")) {
-                        String translated = ServerKit.translateComments(contents[i]);
+                        String translated = ServerKit.getServerResponse(contents[i], "trans_comments.php");
                         bContent.append("  ").append(translated).append("\r\n");
                     } else {
                         bContent.append(contents[i]).append("\r\n");

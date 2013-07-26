@@ -11,7 +11,6 @@ import kit.UIKit;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -51,6 +50,7 @@ import kit.ServerKit;
  */
 public class Main extends javax.swing.JFrame {
     
+    private String dox = "javadoc";
     private String projectFolder;
     private String projectName;
     private DefaultMutableTreeNode rootNode;
@@ -70,21 +70,9 @@ public class Main extends javax.swing.JFrame {
         recentFile = recentFile.substring(1);
         recentFile = recentFile.replace("%20", " ");
         
-        CustomizeUI();
+        customizeUI();
+        openMainImage();
         getRecentItems();
-        
-        // Show about section first
-        FrmAbout frmAbout = new FrmAbout();
-        MyDesktopPane.add(frmAbout);
-        frmAbout.setLayout(new GridBagLayout());
-        frmAbout.setVisible(true);
-        frmAbout.setBorder(null);
-        try {
-            frmAbout.setMaximum(true);
-            ((javax.swing.plaf.basic.BasicInternalFrameUI)frmAbout.getUI()).setNorthPane(null);
-        } catch (PropertyVetoException pvx) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
-        }
     }
 
     /**
@@ -121,7 +109,9 @@ public class Main extends javax.swing.JFrame {
         MIParseTranslate = new javax.swing.JMenuItem();
         MSepFile = new javax.swing.JPopupMenu.Separator();
         MIRunProject = new javax.swing.JMenuItem();
-        MIGenDocs = new javax.swing.JMenuItem();
+        MGenDocs = new javax.swing.JMenu();
+        MIIndonesian = new javax.swing.JMenuItem();
+        MIEnglish = new javax.swing.JMenuItem();
         MISaveProject = new javax.swing.JMenuItem();
         MSepExit = new javax.swing.JPopupMenu.Separator();
         MIExit = new javax.swing.JMenuItem();
@@ -151,7 +141,7 @@ public class Main extends javax.swing.JFrame {
         });
         MyToolbar.add(TOpenProject);
 
-        TRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc_big.png"))); // NOI18N
+        TRunProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/run_project_big.png"))); // NOI18N
         TRunProject.setToolTipText("Generate Docs");
         TRunProject.setEnabled(false);
         TRunProject.setFocusable(false);
@@ -172,6 +162,11 @@ public class Main extends javax.swing.JFrame {
         TSaveProject.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         TSaveProject.setMargin(new java.awt.Insets(2, 4, 2, 4));
         TSaveProject.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        TSaveProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TSaveProjectActionPerformed(evt);
+            }
+        });
         MyToolbar.add(TSaveProject);
 
         MySplit.setBorder(null);
@@ -281,7 +276,7 @@ public class Main extends javax.swing.JFrame {
         });
         MFile.add(MIParseFile);
 
-        MIParseTranslate.setText("Parse & Translate");
+        MIParseTranslate.setText("Translate Comments");
         MIParseTranslate.setEnabled(false);
         MIParseTranslate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -303,19 +298,39 @@ public class Main extends javax.swing.JFrame {
         });
         MProject.add(MIRunProject);
 
-        MIGenDocs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
-        MIGenDocs.setText("Generate Documentation");
-        MIGenDocs.setEnabled(false);
-        MIGenDocs.addActionListener(new java.awt.event.ActionListener() {
+        MGenDocs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/generate_doc.png"))); // NOI18N
+        MGenDocs.setText("Generate Documentation");
+
+        MIIndonesian.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/indonesia.png"))); // NOI18N
+        MIIndonesian.setText("Indonesian");
+        MIIndonesian.setEnabled(false);
+        MIIndonesian.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                MIGenDocsActionPerformed(evt);
+                MIIndonesianActionPerformed(evt);
             }
         });
-        MProject.add(MIGenDocs);
+        MGenDocs.add(MIIndonesian);
+
+        MIEnglish.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/england.png"))); // NOI18N
+        MIEnglish.setText("English");
+        MIEnglish.setEnabled(false);
+        MIEnglish.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MIEnglishActionPerformed(evt);
+            }
+        });
+        MGenDocs.add(MIEnglish);
+
+        MProject.add(MGenDocs);
 
         MISaveProject.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/save_as.png"))); // NOI18N
-        MISaveProject.setText("Save Project As");
+        MISaveProject.setText("Save Project");
         MISaveProject.setEnabled(false);
+        MISaveProject.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MISaveProjectActionPerformed(evt);
+            }
+        });
         MProject.add(MISaveProject);
         MProject.add(MSepExit);
 
@@ -395,8 +410,6 @@ public class Main extends javax.swing.JFrame {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-            //System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
             DoxyApp.bridge.setFromRecent(false);
             projectFolder = chooser.getSelectedFile().getAbsolutePath();
             drawSrcTree();
@@ -449,15 +462,17 @@ public class Main extends javax.swing.JFrame {
         frameSrc.setVisible(true);
         
         try {
-            FrmParseTranslate frmParse = new FrmParseTranslate();
-            MyDesktopPane.add(frmParse);
-            frmParse.setVisible(true);
-            frmParse.setBorder(null);
-            try {
-                frmParse.setMaximum(true);
-                ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
-            } catch (PropertyVetoException pvx) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+            if (DoxyApp.bridge.isFileChoosen()) {
+                FrmParseTranslate frmParse = new FrmParseTranslate();
+                MyDesktopPane.add(frmParse);
+                frmParse.setVisible(true);
+                frmParse.setBorder(null);
+                try {
+                    frmParse.setMaximum(true);
+                    ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
+                } catch (PropertyVetoException pvx) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -474,50 +489,6 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ListRecentProjectsMouseClicked
 
-    private void MIGenDocsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIGenDocsActionPerformed
-        // TODO add your handling code here:
-        MyVector allFiles   = DoxyApp.bridge.getListSources();
-        String fileListName = "src.lst";
-        String outputDocDir = "docs";
-        String workingDir   = baseOutputDir+projectName;
-        try {
-            File nwFile = new File(workingDir+"/"+fileListName);
-            if(!nwFile.exists())
-                nwFile.createNewFile();
-            FileKit.writeTextFile(allFiles, workingDir+"/"+fileListName);
-            
-            String[] cmd = {
-                "javadoc", 
-                "-docletpath", DoxyApp.doxletpath, 
-                "-doclet", DoxyApp.doxlet,
-                "-generatesources",
-                "-paresecomments",
-                "-title", DoxyApp.myAppName, 
-                "-hdf", "project.name", projectName, 
-                "-XDignore.symbol.file", 
-                "-d", workingDir+"\\"+outputDocDir, 
-                "@"+workingDir+"\\"+fileListName
-            }; 
-            Runtime.getRuntime().exec(cmd);
-            JOptionPane.showMessageDialog(null, "Docs of this project created successfully."+
-                    "\nCheck docs in "+workingDir+"/"+outputDocDir, "Information", 
-                    JOptionPane.INFORMATION_MESSAGE);
-            
-            // Logging
-            /**
-            Process child = Runtime.getRuntime().exec(cmd);
-            String line = "";
-            BufferedReader dis = new BufferedReader( new InputStreamReader(child.getInputStream()));
-            while ((line = dis.readLine()) != null) {
-                System.out.println("Line: " + line);
-            }
-            dis.close();
-            **/
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_MIGenDocsActionPerformed
-
     private void TRunProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TRunProjectActionPerformed
         // TODO add your handling code here:
         MIRunProjectActionPerformed(evt);
@@ -530,22 +501,12 @@ public class Main extends javax.swing.JFrame {
 
     private void MICheckUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MICheckUpdateActionPerformed
         // TODO add your handling code here:
+        new FrmVersion(this, true).setVisible(true);
     }//GEN-LAST:event_MICheckUpdateActionPerformed
 
     private void MIAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIAboutActionPerformed
         // TODO add your handling code here:
-        clearDesktopPane();
-        FrmAbout frmAbout = new FrmAbout();
-        MyDesktopPane.add(frmAbout);
-        frmAbout.setLayout(new GridBagLayout());
-        frmAbout.setVisible(true);
-        frmAbout.setBorder(null);
-        try {
-            frmAbout.setMaximum(true);
-            ((javax.swing.plaf.basic.BasicInternalFrameUI)frmAbout.getUI()).setNorthPane(null);
-        } catch (PropertyVetoException pvx) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
-        }
+        new FrmAbout(this, true).setVisible(true);
     }//GEN-LAST:event_MIAboutActionPerformed
 
     private void MyTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyTreeMouseClicked
@@ -573,14 +534,84 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_MyTreeMouseClicked
 
+    private void MIIndonesianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIIndonesianActionPerformed
+        // TODO add your handling code here:
+        generateDocs("indonesian");
+    }//GEN-LAST:event_MIIndonesianActionPerformed
+
+    private void MIEnglishActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIEnglishActionPerformed
+        // TODO add your handling code here:
+        generateDocs("english");
+    }//GEN-LAST:event_MIEnglishActionPerformed
+
+    private void TSaveProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TSaveProjectActionPerformed
+        // TODO add your handling code here:
+        MISaveProjectActionPerformed(evt);
+    }//GEN-LAST:event_TSaveProjectActionPerformed
+
+    private void MISaveProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MISaveProjectActionPerformed
+        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(null, "The project successfully saved in "+
+                    baseOutputDir+"/"+projectName, "Information", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_MISaveProjectActionPerformed
+
+    private void generateDocs(String lang) {
+        MyVector allFiles   = DoxyApp.bridge.getListSources();
+        String fileListName = "src.lst";
+        String outputDocDir = "docs/"+lang;
+        String workingDir   = baseOutputDir+projectName;
+        try {
+            File checkingDir = new File(workingDir+"/"+outputDocDir);
+            if (checkingDir.listFiles().length <= 0) {
+                File nwFile = new File(workingDir+"/"+fileListName);
+                if (!nwFile.exists()) {
+                    nwFile.createNewFile();
+                    FileKit.writeTextFile(allFiles, workingDir+"/"+fileListName);
+                }
+
+                String[] cmd = {
+                    dox, 
+                    "-docletpath", DoxyApp.doxletpath, 
+                    "-doclet", DoxyApp.doxlet,
+                    "-generatesources",
+                    "-parsecomments",
+                    "-title", DoxyApp.myAppName, 
+                    "-hdf", "project.name", projectName, 
+                    "-XDignore.symbol.file", 
+                    "-d", workingDir+"/"+outputDocDir, 
+                    "@"+workingDir+"/"+fileListName
+                };
+                Runtime.getRuntime().exec(cmd);
+            }
+            JOptionPane.showMessageDialog(null, "Docs of this project created successfully."+
+                    "\nCheck docs in "+workingDir+"/"+outputDocDir, "Information", 
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     public static void pipeStream(InputStream input, OutputStream output) throws IOException {
         byte buffer[] = new byte[1024];
-        int numRead = 0;
+        int numRead;
         do {
             numRead = input.read(buffer);
             output.write(buffer, 0, numRead);
         } while (input.available() > 0);
         output.flush();
+    }
+    
+    private void openMainImage() {
+        clearDesktopPane();
+        FrmMain frmMain = new FrmMain();
+        MyDesktopPane.add(frmMain);
+        frmMain.setVisible(true);
+        frmMain.setBorder(null);
+        try {
+            frmMain.setMaximum(true);
+            ((javax.swing.plaf.basic.BasicInternalFrameUI)frmMain.getUI()).setNorthPane(null);
+        } catch (PropertyVetoException pvx) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+        }
     }
     
     /**
@@ -589,7 +620,7 @@ public class Main extends javax.swing.JFrame {
      * Set padding the components
      * Create top border of the status panel (bottom panel)
      */
-    private void CustomizeUI(){
+    private void customizeUI(){
         LblTime.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
         showDateTime();
         MyTree.setRootVisible(false);
@@ -634,8 +665,9 @@ public class Main extends javax.swing.JFrame {
         MIRunProject.setEnabled(enable);
         MIParseFile.setEnabled(enable);
         MIParseTranslate.setEnabled(enable);
-        MIGenDocs.setEnabled(enable);
         MISaveProject.setEnabled(enable);
+        MIIndonesian.setEnabled(true);
+        MIEnglish.setEnabled(true);
         
         TRunProject.setEnabled(enable);
         TSaveProject.setEnabled(enable);
@@ -643,10 +675,15 @@ public class Main extends javax.swing.JFrame {
     
     private void getRecentItems() {
         try {
+            if (recentFile.startsWith("ile")) {
+                recentFile = recentFile.substring(5);
+            }
             recentProjects = FileKit.readTextFile(recentFile);
             Vector<String> recentItems = new Vector<>();
-            recentItems.addAll(recentProjects);
-            ListRecentProjects.setListData(recentItems);
+            if (recentProjects.size()>0) {
+                recentItems.addAll(recentProjects);
+                ListRecentProjects.setListData(recentItems);
+            }
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -688,6 +725,13 @@ public class Main extends javax.swing.JFrame {
             File dstDir = new File(baseOutputDir+projectName);
             try{
                 FileKit.copyFolder(srcDir, dstDir);
+                
+                // Create Indonesian & English folder
+                new File(baseOutputDir+projectName+"/docs").mkdir();
+                new File(baseOutputDir+projectName+"/docs/temp").mkdir();
+                new File(baseOutputDir+projectName+"/docs/indonesian").mkdir();
+                new File(baseOutputDir+projectName+"/docs/english").mkdir();
+                
                 // Rewrite opened project
                 projectFolder = baseOutputDir+projectName;
             }catch(IOException e){ }
@@ -782,12 +826,14 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JTabbedPane LeftSide;
     private javax.swing.JList ListRecentProjects;
     private javax.swing.JMenu MFile;
+    private javax.swing.JMenu MGenDocs;
     private javax.swing.JMenu MHelp;
     private javax.swing.JMenuItem MIAbout;
     private javax.swing.JMenuItem MICheckUpdate;
+    private javax.swing.JMenuItem MIEnglish;
     private javax.swing.JMenuItem MIExit;
-    private javax.swing.JMenuItem MIGenDocs;
     private javax.swing.JMenuItem MIHowTo;
+    private javax.swing.JMenuItem MIIndonesian;
     private javax.swing.JMenuItem MILoadProject;
     private javax.swing.JMenuItem MIParseFile;
     private javax.swing.JMenuItem MIParseTranslate;

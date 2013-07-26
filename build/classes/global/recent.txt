@@ -1,5 +1,3 @@
 D:/Result/jsyntax
-D:\Result\jsyntax
-D:\College\Semester 8\Skripsi\Java Source\doxy
-D:\Result\doxy
-D:\Test
+D:/Result/doxy
+D:/Result/Samples

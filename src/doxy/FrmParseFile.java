@@ -179,9 +179,10 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
         CommentsSection = new javax.swing.JTextArea();
         SPMethods = new javax.swing.JScrollPane();
         MethodsSection = new javax.swing.JTextArea();
-        DescC = new javax.swing.JLabel();
         DescA = new javax.swing.JLabel();
         DescB = new javax.swing.JLabel();
+        LblComments = new javax.swing.JLabel();
+        LblMethods = new javax.swing.JLabel();
         ParseGraph = new javax.swing.JPanel();
 
         CommentsSection.setColumns(20);
@@ -192,12 +193,16 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
         MethodsSection.setRows(8);
         SPMethods.setViewportView(MethodsSection);
 
-        DescC.setText("Top : Comments Section. Bottom : Methods Section");
-
         DescA.setText("Loaded file :");
 
         DescB.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         DescB.setText("...");
+
+        LblComments.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        LblComments.setText("Comments");
+
+        LblMethods.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        LblMethods.setText("Methods");
 
         javax.swing.GroupLayout ParseDiffLayout = new javax.swing.GroupLayout(ParseDiff);
         ParseDiff.setLayout(ParseDiffLayout);
@@ -206,32 +211,35 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
             .addGroup(ParseDiffLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(ParseDiffLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(SPComments)
+                    .addComponent(SPComments, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                     .addComponent(SPMethods)
                     .addGroup(ParseDiffLayout.createSequentialGroup()
                         .addGroup(ParseDiffLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(DescC)
+                            .addComponent(LblComments)
+                            .addComponent(LblMethods)
                             .addGroup(ParseDiffLayout.createSequentialGroup()
                                 .addComponent(DescA)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(DescB)))
-                        .addGap(0, 123, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         ParseDiffLayout.setVerticalGroup(
             ParseDiffLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ParseDiffLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(LblComments)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(SPComments, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(SPMethods, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
+                .addComponent(LblMethods)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(SPMethods, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(ParseDiffLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(DescA)
                     .addComponent(DescB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(DescC)
-                .addGap(6, 6, 6))
+                .addContainerGap())
         );
 
         ParseTabbedPane.addTab("Comments & Method", new javax.swing.ImageIcon(getClass().getResource("/assets/application_tile_horizontal.png")), ParseDiff); // NOI18N
@@ -244,7 +252,7 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
         );
         ParseGraphLayout.setVerticalGroup(
             ParseGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 346, Short.MAX_VALUE)
+            .addGap(0, 358, Short.MAX_VALUE)
         );
 
         ParseTabbedPane.addTab("Source Graph", new javax.swing.ImageIcon(getClass().getResource("/assets/chart_pie.png")), ParseGraph); // NOI18N
@@ -266,7 +274,8 @@ public class FrmParseFile extends javax.swing.JInternalFrame {
     private javax.swing.JTextArea CommentsSection;
     private javax.swing.JLabel DescA;
     private javax.swing.JLabel DescB;
-    private javax.swing.JLabel DescC;
+    private javax.swing.JLabel LblComments;
+    private javax.swing.JLabel LblMethods;
     private javax.swing.JTextArea MethodsSection;
     private javax.swing.JPanel ParseDiff;
     private javax.swing.JPanel ParseGraph;

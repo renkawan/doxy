@@ -25,12 +25,11 @@ public class ServerKit {
      * @return
      * @throws IOException
      */
-    public static String translateComments(String comments) throws IOException {
+    public static String getServerResponse(String comments, String accessFile) throws IOException {
         String result = "";
         String server = DoxyApp.myServer;
-        String translatorFile = "trans_comments.php";
         
-        URL url = new URL(server+translatorFile);
+        URL url = new URL(server+accessFile);
         String data = "text=" + URLEncoder.encode(comments, "UTF-8");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         
@@ -66,6 +65,11 @@ public class ServerKit {
         }
     }
     
+    /**
+     * Open URL in browser
+     * Support on Windows, Linux and Mac Operating System
+     * @param url 
+     */
     public static void openURL(String url) {
         String os = System.getProperty("os.name").toLowerCase();
         Runtime rt = Runtime.getRuntime();
