@@ -11,6 +11,7 @@ import kit.UIKit;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -32,10 +33,14 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -74,7 +79,7 @@ public class Main extends javax.swing.JFrame {
         openMainImage();
         getRecentItems();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -405,13 +410,14 @@ public class Main extends javax.swing.JFrame {
         JFileChooser chooser;
         String choosertitle = "Choose a Root Project Directory";
         chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setCurrentDirectory(new java.io.File(DoxyApp.bridge.getLastPath()));
         chooser.setDialogTitle(choosertitle);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            DoxyApp.bridge.setFromRecent(false);
             projectFolder = chooser.getSelectedFile().getAbsolutePath();
+            DoxyApp.bridge.setLastPath(projectFolder);
+            DoxyApp.bridge.setFromRecent(false);
             drawSrcTree();
         }
     }//GEN-LAST:event_MILoadProjectActionPerformed
@@ -433,6 +439,35 @@ public class Main extends javax.swing.JFrame {
 
     private void MIRunProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIRunProjectActionPerformed
         // TODO add your handling code here:
+        MyVector allFiles = DoxyApp.bridge.getListSources();
+        String baseDirDst = baseOutputDir+projectName+"/docs/temp/";
+        
+        for (int i=0;i<allFiles.size();i++) {
+            String pathFile = allFiles.get(i).toString();
+            File src = new File(pathFile);
+            String [] splitSrcPath = pathFile.replaceAll("\\\\", "/").split("/");
+            File dst = new File(baseDirDst+splitSrcPath[splitSrcPath.length-1]); 
+            try {
+                File dirDst = new File(baseDirDst);
+                if (dirDst.listFiles().length <= allFiles.size()) {
+                    FileKit.copyFolder(src, dst);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        try {
+            MyVector tempFiles = FileKit.getFileDirectory(new File(baseDirDst));
+            File nwFile = new File(baseOutputDir+projectName+"/src.ind.lst");
+        
+            if (!nwFile.exists()) {
+                nwFile.createNewFile();
+                FileKit.writeTextFile(tempFiles, baseOutputDir+projectName+"/src.ind.lst");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_MIRunProjectActionPerformed
 
     private void MIParseFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIParseFileActionPerformed
@@ -714,13 +749,33 @@ public class Main extends javax.swing.JFrame {
         }
     }
     
-    private void drawSrcTree() {
-        String [] splitPath = (projectFolder.replaceAll("\\\\", "/")).split("/");
-        projectName = splitPath[splitPath.length-1];
+    private class CopySource extends SwingWorker<String, String> {
+        private final JLabel label = new JLabel("  Please wait ...", 
+                new ImageIcon(this.getClass().getResource("/assets/loading.gif")), 
+                SwingConstants.TRAILING);
+        private final JPanel panel;
+        private final JDialog dialog;
         
-        if (!DoxyApp.bridge.isFromRecent()) {
-            // Backup first
-            // No editting in original project
+        public CopySource() {
+            panel = new JPanel();
+            dialog = new JDialog();
+            dialog.setUndecorated(true);
+            label.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+            panel.setBorder(BorderFactory.createLineBorder(new Color(189, 199, 216), 1));
+            panel.setBackground(new Color(237, 239, 244));
+            panel.setLayout(new GridBagLayout());
+            panel.add(label);
+            dialog.add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        }
+        
+        @Override
+        protected String doInBackground() throws Exception {
+            Thread.sleep(700);
+            publish("  Setting up ...");
+            
             File srcDir = new File(projectFolder);
             File dstDir = new File(baseOutputDir+projectName);
             try{
@@ -735,6 +790,34 @@ public class Main extends javax.swing.JFrame {
                 // Rewrite opened project
                 projectFolder = baseOutputDir+projectName;
             }catch(IOException e){ }
+            
+            publish("  Done");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ix) { }
+            return null;
+        }        
+        
+        @Override
+        protected void process(List<String> chunks) {
+            label.setText(chunks.get(0));
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.repaint();
+        }
+
+        @Override
+        protected void done() {
+            dialog.setVisible(false);
+        }
+    }
+    
+    private void drawSrcTree() {
+        String [] splitPath = (projectFolder.replaceAll("\\\\", "/")).split("/");
+        projectName = splitPath[splitPath.length-1];
+        
+        if (!DoxyApp.bridge.isFromRecent()) {
+            new CopySource().execute();
         }
         DoxyApp.workPath = projectFolder;
             
@@ -802,13 +885,7 @@ public class Main extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>

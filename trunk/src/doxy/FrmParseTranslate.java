@@ -8,6 +8,8 @@ import global.DoxyApp;
 import japa.parser.JavaParser;
 import japa.parser.ast.Comment;
 import japa.parser.ast.CompilationUnit;
+import java.awt.Color;
+import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,10 +17,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import kit.FileKit;
 
@@ -27,7 +39,6 @@ import kit.FileKit;
  * @author Rendra
  */
 public class FrmParseTranslate extends javax.swing.JInternalFrame {
-    private String selectedFile;
     private CompilationUnit cu;
     
     /**
@@ -35,43 +46,114 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
      */
     public FrmParseTranslate() throws Exception {
         initComponents();
-        if (DoxyApp.bridge.getSelectedSrcFile()==null) {
-            JOptionPane.showMessageDialog(null, "Please choose a file first", "Choose file", JOptionPane.WARNING_MESSAGE);
-        } else {
-            processFile();
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if (DoxyApp.bridge.getSelectedSrcFile()!=null) {
+                    new Translate().execute();
+                } else {
+                    TAOriginal.setText("");
+                    TAResult.setText("");
+                    TAOriginal.setEnabled(false);
+                    TAResult.setEnabled(false);
+                    LblStatus.setText("Please wait ...");            
+                }
+            }
+        });
     }
     
     /**
-     * Read the source code, extract it then translate the comments
-     * @throws Exception 
+     * Translate process
+     * With loading status
      */
-    private void processFile() throws Exception {
-        selectedFile = DoxyApp.bridge.getSelectedSrcFile();
-        FileInputStream in = new FileInputStream(selectedFile);
-        try {
-            cu = JavaParser.parse(in);
-        } finally {
-            in.close();
-        }
-        List<Comment> srcComments = cu.getComments();
-        List<Comment> newComments = new ArrayList<>();
-        StringBuilder oriComments = new StringBuilder();
-        StringBuilder resComments = new StringBuilder();
-        for (Comment cm : srcComments){
-            oriComments.append(cm.toString());
-            String [] contents = cm.getContent().split("\r\n");
-            StringBuilder bContent = FileKit.extractAndTranslate(contents);
-            cm.setContent(bContent.toString());
-            resComments.append(cm.toString());
-            newComments.add(cm);
+    private class Translate extends SwingWorker<String[], String> {
+        private final JLabel label = new JLabel("  Please wait ...", 
+                new ImageIcon(this.getClass().getResource("/assets/loading.gif")), 
+                SwingConstants.TRAILING);
+        private final JPanel panel;
+        private final JDialog dialog;
+        
+        public Translate() {
+            JFrame frm = (JFrame)getTopLevelAncestor();
+            dialog = new JDialog(frm);
+            panel = new JPanel();
+            TAOriginal.setText("");
+            TAResult.setText("");
+            TAOriginal.setEnabled(false);
+            TAResult.setEnabled(false);
+            LblStatus.setText("Please wait ...");
+            dialog.setUndecorated(true);
+            dialog.setUndecorated(true);
+            label.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+            panel.setBorder(BorderFactory.createLineBorder(new Color(189, 199, 216), 1));
+            panel.setBackground(new Color(237, 239, 244));
+            panel.setLayout(new GridBagLayout());
+            panel.add(label);
+            dialog.add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
         }
         
-        TAOriginal.setText(oriComments.toString());
-        TAResult.setText(resComments.toString());
-        TAOriginal.setCaretPosition(0);
-        TAResult.setCaretPosition(0);
-        LblStatus.setText(FileKit.getFileName(DoxyApp.bridge.getSelectedSrcFile())+" "+LblStatus.getText());
+        @Override
+        protected String[] doInBackground() throws Exception {
+            Thread.sleep(700);
+            publish("  Translating ...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ix) { }
+
+            // Starting process
+            String slctdFile = DoxyApp.bridge.getSelectedSrcFile();
+            FileInputStream in = new FileInputStream(slctdFile);
+            CompilationUnit comp;
+            try {
+                comp = JavaParser.parse(in);
+            } finally {
+                in.close();
+            }
+            List<Comment> srcComments = comp.getComments();
+            List<Comment> newComments = new ArrayList<>();
+            StringBuilder oriComments = new StringBuilder();
+            StringBuilder resComments = new StringBuilder();
+            for (Comment cm : srcComments){
+                oriComments.append(cm.toString());
+                String [] contents = cm.getContent().split("\n");
+                StringBuilder bContent = FileKit.extractAndTranslate(contents);
+                cm.setContent(bContent.toString());
+                resComments.append(cm.toString());
+                newComments.add(cm);
+            }
+            publish("  Done");
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException ix) { }
+            String[] res = {oriComments.toString(), newComments.toString()};
+            return res;
+        }
+
+        @Override
+        protected void process(List<String> chunks) {
+            label.setText(chunks.get(0));
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.repaint();
+        }
+
+        @Override
+        protected void done() {
+            try {                    
+                String[] comments = this.get();
+                TAOriginal.setEnabled(true);
+                TAResult.setEnabled(true);
+                TAOriginal.setText(comments[0]);
+                TAResult.setText(comments[1]);
+                TAOriginal.setCaretPosition(0);
+                TAResult.setCaretPosition(0);
+                LblStatus.setText(FileKit.getFileName(DoxyApp.bridge.getSelectedSrcFile())+" is successfully translated");
+                dialog.setVisible(false);
+            } catch (InterruptedException | ExecutionException e) { }
+        }
     }
     
     /**

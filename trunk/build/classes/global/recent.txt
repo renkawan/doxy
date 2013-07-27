@@ -1,3 +1,7 @@
+D:\Samples\jsyntax
+D:\Samples\jlastfmplayer
+D:\Samples\javafaces
+D:\Result
 D:/Result/jsyntax
 D:/Result/doxy
 D:/Result/Samples

@@ -107,6 +107,7 @@ public class FrmSrcList extends javax.swing.JDialog {
 
     private void LoadSrcFiles() {
         MyVector javaFiles = DoxyApp.bridge.getListSources();
+        srcList.setFocusable(true);
         srcList.setSelectionMode(0);
         srcList.setListData(javaFiles);
     }

@@ -143,19 +143,22 @@ public class FileKit {
         for (int i=0;i<contents.length;i++) {
             if (contents[i].trim().equals("")) {
                 if (i!=(contents.length)-1)
-                    bContent.append(contents[i]).append("\r\n");
+                    bContent.append(contents[i]).append("\n");
                 else
                     bContent.append(contents[i]);
             } else {
                 if (contents[i].trim().equals("*")) {
-                    bContent.append(contents[i]).append("\r\n");
+                    bContent.append(contents[i]).append("\n");
                 } else {
                     if (!contents[i].matches("(?i).*@param.*") && !contents[i].matches("(?i).*@return.*")
                             && !contents[i].matches("(?i).*@author.*")) {
-                        String translated = ServerKit.getServerResponse(contents[i], "trans_comments.php");
-                        bContent.append("  ").append(translated).append("\r\n");
+                        
+                        // Skip parenthesis symbol use reges pattern : \([^\(]*\)
+                        String translated = ServerKit.getServerResponse(
+                                contents[i].replaceAll("\\([^\\(]*\\)", ""), "trans_comments.php");
+                        bContent.append("  ").append(translated).append("\n");
                     } else {
-                        bContent.append(contents[i]).append("\r\n");
+                        bContent.append(contents[i]).append("\n");
                     }
                 }
             }
