@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class SrcParser {
     public static void main(String[] args) throws Exception {
-        FileInputStream in = new FileInputStream("D:/NIO2_FileVisitor.java");
+        FileInputStream in = new FileInputStream("D:\\Result\\javafaces\\docs\\temp\\EigenvalueDecomposition.java");
         CompilationUnit cu;
         try {
             cu = JavaParser.parse(in);

@@ -12,6 +12,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,6 +52,22 @@ public class FileKit {
             }
         }
         return vectorDirectory;
+    }
+    
+    public static MyVector getFileDirectory(File directory, String extension) {
+        final String ext = extension;
+        MyVector vectorFiles = new MyVector(directory.getName());
+        File[] files = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                String name = pathname.getName().toLowerCase();
+                return name.endsWith(ext) && !("System Volume Information".equalsIgnoreCase(name));
+            }
+        });
+        for (File file : files) {
+            vectorFiles.add(file.getAbsolutePath());
+        }
+        return vectorFiles;
     }
     
     /**
@@ -133,6 +150,30 @@ public class FileKit {
     }
     
     /**
+     * Write existing file from large string
+     * @param text
+     * @param aFileName
+     * @throws IOException 
+     */
+    public static void writeTextFile(String text, String aFileName) throws IOException {
+        File fl = new File(aFileName);
+        FileOutputStream fop = null;
+        try {
+            fop = new FileOutputStream(fl);
+            byte[] contentInBytes = text.getBytes(StandardCharsets.UTF_8);
+            fop.write(contentInBytes);
+            fop.flush();
+            fop.close();
+        } catch (IOException e) {
+        } finally {
+            try {
+                if (fop != null)
+                    fop.close();
+            } catch (IOException e) { }
+        }
+    }
+    
+    /**
      * Extract comments to be read per line, then translate the comment
      * @param contents
      * @return StringBuilder bContent
@@ -151,7 +192,7 @@ public class FileKit {
                     bContent.append(contents[i]).append("\n");
                 } else {
                     if (!contents[i].matches("(?i).*@param.*") && !contents[i].matches("(?i).*@return.*")
-                            && !contents[i].matches("(?i).*@author.*")) {
+                            && !contents[i].matches("(?i).*@author.*") && !contents[i].matches("(?i).*@file.*")) {
                         
                         // Skip parenthesis symbol use reges pattern : \([^\(]*\)
                         String translated = ServerKit.getServerResponse(
