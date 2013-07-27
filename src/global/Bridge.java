@@ -20,6 +20,7 @@ public class Bridge {
     private int lastLineVisited;
     private boolean isChoosen = false;
     private boolean fromRecent = false;
+    private String lastPath = ".";
     
     /**
      * Set working directory which used for further analyzing
@@ -154,5 +155,13 @@ public class Bridge {
     
     public boolean isFromRecent() {
         return fromRecent;
+    }
+    
+    public void setLastPath(String lastPath) {
+        this.lastPath = lastPath;
+    }
+    
+    public String getLastPath() {
+        return lastPath;
     }
 }
