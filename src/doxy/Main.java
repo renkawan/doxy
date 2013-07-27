@@ -6,6 +6,9 @@ package doxy;
 
 import global.DoxyApp;
 import global.MyVector;
+import japa.parser.JavaParser;
+import japa.parser.ast.Comment;
+import japa.parser.ast.CompilationUnit;
 import kit.FileKit;
 import kit.UIKit;
 
@@ -18,6 +21,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,6 +34,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -441,32 +447,47 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
         MyVector allFiles = DoxyApp.bridge.getListSources();
         String baseDirDst = baseOutputDir+projectName+"/docs/temp/";
+        String flagFileName = baseOutputDir+projectName+"/docs/temp/translated.txt";
+        String ndFileList = baseOutputDir+projectName+"/src.ind.lst";
+        File nwFile = new File(ndFileList);
         
-        for (int i=0;i<allFiles.size();i++) {
-            String pathFile = allFiles.get(i).toString();
-            File src = new File(pathFile);
-            String [] splitSrcPath = pathFile.replaceAll("\\\\", "/").split("/");
-            File dst = new File(baseDirDst+splitSrcPath[splitSrcPath.length-1]); 
+        if (!nwFile.exists()) {
+            // Copying sources into temp folder
+            for (int i=0;i<allFiles.size();i++) {
+                String pathFile = allFiles.get(i).toString();
+                File src = new File(pathFile);
+                String [] splitSrcPath = pathFile.replaceAll("\\\\", "/").split("/");
+                File dst = new File(baseDirDst+splitSrcPath[splitSrcPath.length-1]); 
+                try {
+                    File dirDst = new File(baseDirDst);
+                    if (dirDst.listFiles().length <= allFiles.size()) {
+                        FileKit.copyFolder(src, dst);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            // List all files in temp folder & translate those files
             try {
-                File dirDst = new File(baseDirDst);
-                if (dirDst.listFiles().length <= allFiles.size()) {
-                    FileKit.copyFolder(src, dst);
+                MyVector tempFiles = FileKit.getFileDirectory(new File(baseDirDst), ".java");
+                if (!nwFile.exists()) {
+                    nwFile.createNewFile();
+                    FileKit.writeTextFile(tempFiles, ndFileList);
+                }
+
+                // If files not translated yet
+                File flagFile = new File(flagFileName);
+                if (!flagFile.exists()) {
+                    new TranslateProject(tempFiles).execute();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        
-        try {
-            MyVector tempFiles = FileKit.getFileDirectory(new File(baseDirDst));
-            File nwFile = new File(baseOutputDir+projectName+"/src.ind.lst");
-        
-            if (!nwFile.exists()) {
-                nwFile.createNewFile();
-                FileKit.writeTextFile(tempFiles, baseOutputDir+projectName+"/src.ind.lst");
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } else {
+            new Translated().execute();
         }
     }//GEN-LAST:event_MIRunProjectActionPerformed
 
@@ -867,6 +888,127 @@ public class Main extends javax.swing.JFrame {
             }
         };
         new Timer(timeDelay, time).start();
+    }
+    
+    private class TranslateProject extends SwingWorker<String, String> {
+        private final JLabel label = new JLabel("  Please wait ...", 
+                new ImageIcon(this.getClass().getResource("/assets/loading.gif")), 
+                SwingConstants.TRAILING);
+        private final JPanel panel;
+        private final JDialog dialog;
+        private final MyVector filesTemp;
+        
+        public TranslateProject(MyVector tempFiles) {
+            filesTemp = tempFiles;
+            dialog = new JDialog();
+            panel = new JPanel();
+            dialog.setUndecorated(true);
+            label.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+            panel.setBorder(BorderFactory.createLineBorder(new Color(189, 199, 216), 1));
+            panel.setBackground(new Color(237, 239, 244));
+            panel.setLayout(new GridBagLayout());
+            panel.add(label);
+            dialog.add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        }
+        
+        @Override
+        protected String doInBackground() throws Exception {
+            publish("  Translating ...");
+            try {
+                Thread.sleep(700);
+            } catch (InterruptedException ix) { }
+
+            for (int i=0;i<filesTemp.size();i++) {
+                // Starting process
+                String slctdFile = filesTemp.get(i).toString();
+                FileInputStream in = new FileInputStream(slctdFile);
+                CompilationUnit comp;
+                try {
+                    comp = JavaParser.parse(in);
+                } finally {
+                    in.close();
+                }
+                Pattern p_c = Pattern.compile(DoxyApp.rxComment, Pattern.DOTALL);
+                Matcher m_c = p_c.matcher(comp.toString());
+                if (m_c.find()) {
+                    List<Comment> srcComments = comp.getComments();
+                    int j = 0;
+                    for (Comment cm : srcComments){
+                        String [] contents = cm.getContent().split("\n");
+                        StringBuilder bContent = FileKit.extractAndTranslate(contents);
+                        cm.setContent(bContent.toString());
+                        srcComments.set(j, cm);
+                        j++;
+                    }
+                    comp.setComments(srcComments);
+                    FileKit.writeTextFile(comp.toString(), slctdFile);
+                }
+            }
+            
+            String flagFileName = baseOutputDir+projectName+"/docs/temp/translated.txt";
+            File flagFile = new File(flagFileName);
+            if (!flagFile.exists())
+                flagFile.createNewFile();
+            FileKit.writeTextFile("true", flagFileName);
+            
+            publish("  Done");
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException ix) { }
+            return null;
+        }
+
+        @Override
+        protected void process(List<String> chunks) {
+            label.setText(chunks.get(0));
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.repaint();
+        }
+
+        @Override
+        protected void done() {
+            dialog.setVisible(false);
+        }
+    }
+    
+    private class Translated extends SwingWorker<String, String> {
+        private final JLabel label = new JLabel("  Done", 
+                new ImageIcon(this.getClass().getResource("/assets/loading.gif")), 
+                SwingConstants.TRAILING);
+        private final JPanel panel;
+        private final JDialog dialog;
+        
+        public Translated() {
+            dialog = new JDialog();
+            panel = new JPanel();
+            dialog.setUndecorated(true);
+            label.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+            panel.setBorder(BorderFactory.createLineBorder(new Color(189, 199, 216), 1));
+            panel.setBackground(new Color(237, 239, 244));
+            panel.setLayout(new GridBagLayout());
+            panel.add(label);
+            dialog.add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        }
+        
+        @Override
+        protected String doInBackground() throws Exception {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ix) { }
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            dialog.setVisible(false);
+        }
     }
     
     /**

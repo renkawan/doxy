@@ -83,7 +83,6 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
             TAResult.setEnabled(false);
             LblStatus.setText("Please wait ...");
             dialog.setUndecorated(true);
-            dialog.setUndecorated(true);
             label.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
             panel.setBorder(BorderFactory.createLineBorder(new Color(189, 199, 216), 1));
             panel.setBackground(new Color(237, 239, 244));
@@ -121,7 +120,7 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
                 String [] contents = cm.getContent().split("\n");
                 StringBuilder bContent = FileKit.extractAndTranslate(contents);
                 cm.setContent(bContent.toString());
-                resComments.append(cm.toString());
+                resComments.append(cm.getContent());
                 newComments.add(cm);
             }
             publish("  Done");

@@ -56,7 +56,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="SPRes" max="32767" attributes="0"/>
-                  <Component id="SPOri" pref="336" max="32767" attributes="0"/>
+                  <Component id="SPOri" pref="340" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
