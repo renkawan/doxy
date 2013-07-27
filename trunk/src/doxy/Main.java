@@ -111,6 +111,7 @@ public class Main extends javax.swing.JFrame {
         MyDesktopPane = new javax.swing.JDesktopPane();
         StatusPanel = new javax.swing.JPanel();
         LblTime = new javax.swing.JLabel();
+        LblCampus = new javax.swing.JLabel();
         MainMenu = new javax.swing.JMenuBar();
         MProject = new javax.swing.JMenu();
         MILoadProject = new javax.swing.JMenuItem();
@@ -247,19 +248,25 @@ public class Main extends javax.swing.JFrame {
 
         LblTime.setText("...");
 
+        LblCampus.setText("Adhi Tama Surabaya Institute Of Technology");
+
         javax.swing.GroupLayout StatusPanelLayout = new javax.swing.GroupLayout(StatusPanel);
         StatusPanel.setLayout(StatusPanelLayout);
         StatusPanelLayout.setHorizontalGroup(
             StatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, StatusPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(LblCampus)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(LblTime)
                 .addContainerGap())
         );
         StatusPanelLayout.setVerticalGroup(
             StatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(StatusPanelLayout.createSequentialGroup()
-                .addComponent(LblTime)
+                .addGroup(StatusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(LblTime)
+                    .addComponent(LblCampus))
                 .addGap(0, 11, Short.MAX_VALUE))
         );
 
@@ -678,6 +685,7 @@ public class Main extends javax.swing.JFrame {
      */
     private void customizeUI(){
         LblTime.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+        LblCampus.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
         showDateTime();
         MyTree.setRootVisible(false);
         UIKit.flattenSplitPane(MySplit);
@@ -1041,6 +1049,7 @@ public class Main extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel LblCampus;
     private javax.swing.JLabel LblTime;
     private javax.swing.JTabbedPane LeftSide;
     private javax.swing.JList ListRecentProjects;

@@ -12,7 +12,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -192,7 +191,7 @@ public class FileKit {
                     bContent.append(contents[i]).append("\n");
                 } else {
                     if (!contents[i].matches("(?i).*@param.*") && !contents[i].matches("(?i).*@return.*")
-                            && !contents[i].matches("(?i).*@author.*") && !contents[i].matches("(?i).*@file.*")) {
+                            && !contents[i].matches("(?i).*@author.*")) {
                         
                         // Skip parenthesis symbol use reges pattern : \([^\(]*\)
                         String translated = ServerKit.getServerResponse(
