@@ -1,5 +1,6 @@
-D:\Samples\javafaces
+D:\Samples\autocomplete
 D:\Samples\jsyntax
+D:\Samples\jmplurk
 D:\Samples\jlastfmplayer
 D:\Result
 D:/Result/jsyntax
