@@ -15,7 +15,6 @@ import kit.UIKit;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -453,15 +452,32 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_MIExitActionPerformed
 
     private void MIRunProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIRunProjectActionPerformed
-        // TODO add your handling code here:
+        String baseWorkingDir = baseOutputDir+projectName;
+        /**
+         * Create first list file
+         * List all original source code
+         */
         MyVector allFiles = DoxyApp.bridge.getListSources();
-        String baseDirDst = baseOutputDir+projectName+"/docs/temp/";
-        String flagFileName = baseOutputDir+projectName+"/docs/temp/translated.txt";
-        String ndFileList = baseOutputDir+projectName+"/src.ind.lst";
+        try {
+            File srcLst = new File(baseWorkingDir+"/src.lst");
+            if (!srcLst.exists()) {
+                srcLst.createNewFile();
+                FileKit.writeTextFile(allFiles, baseWorkingDir+"/src.lst");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        String baseDirDst   = baseWorkingDir+"/docs/temp/";
+        String flagFileName = baseWorkingDir+"/docs/temp/translated.txt";
+        String ndFileList   = baseWorkingDir+"/src.ind.lst";
         File nwFile = new File(ndFileList);
         
         if (!nwFile.exists()) {
-            // Copying sources into temp folder
+            /**
+             * Copying original source code into temp folder
+             * for Indonesian translation
+             */
             for (int i=0;i<allFiles.size();i++) {
                 String pathFile = allFiles.get(i).toString();
                 File src = new File(pathFile);
@@ -477,18 +493,22 @@ public class Main extends javax.swing.JFrame {
                 }
             }
 
-            // List all files in temp folder & translate those files
+            /**
+             * List all files in temp folder & translate those files
+             */ 
             try {
                 MyVector tempFiles = FileKit.getFileDirectory(new File(baseDirDst), ".java");
                 if (!nwFile.exists()) {
+                    System.out.println(tempFiles.toString());
                     nwFile.createNewFile();
                     FileKit.writeTextFile(tempFiles, ndFileList);
                 }
 
-                // If files not translated yet
                 File flagFile = new File(flagFileName);
                 if (!flagFile.exists()) {
                     new TranslateProject(tempFiles).execute();
+                } else {
+                    new Translated().execute();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -621,19 +641,15 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_MISaveProjectActionPerformed
 
     private void generateDocs(String lang) {
-        MyVector allFiles   = DoxyApp.bridge.getListSources();
-        String fileListName = "src.lst";
+        String fileListName = "src.ind.lst";
+        if (lang.equals("english")) {
+            fileListName    = "src.lst";
+        }
         String outputDocDir = "docs/"+lang;
         String workingDir   = baseOutputDir+projectName;
         try {
             File checkingDir = new File(workingDir+"/"+outputDocDir);
             if (checkingDir.listFiles().length <= 0) {
-                File nwFile = new File(workingDir+"/"+fileListName);
-                if (!nwFile.exists()) {
-                    nwFile.createNewFile();
-                    FileKit.writeTextFile(allFiles, workingDir+"/"+fileListName);
-                }
-
                 String[] cmd = {
                     dox, 
                     "-docletpath", DoxyApp.doxletpath, 
@@ -648,13 +664,29 @@ public class Main extends javax.swing.JFrame {
                 };
                 Runtime.getRuntime().exec(cmd);
             }
+            
+            // Wait
+            try {
+                Thread.sleep(2500);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             JOptionPane.showMessageDialog(null, "Docs of this project created successfully."+
                     "\nCheck docs in "+workingDir+"/"+outputDocDir, "Information", 
                     JOptionPane.INFORMATION_MESSAGE);
+            
+            // Wait more
+            try {
+                Thread.sleep(2500);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
     public static void pipeStream(InputStream input, OutputStream output) throws IOException {
         byte buffer[] = new byte[1024];
         int numRead;
