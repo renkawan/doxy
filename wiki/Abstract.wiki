@@ -1,0 +1,9 @@
+#labels Featured,Phase-Support
+#Abstract.
+
+= Introduction =
+
+*Comments* are support the structure of the source code to understand the 
+purpose and objectives of a program or source code  within the software. Comments are the sole form of documentation that available for a system, describes an algorithm, specifying constraints such as pre-conditions and post-conditions or to warn the developer of the peculiarity of a complex source code lines. 
+
+*Documentation is important*, it's help to avoid any misunderstanding for developers on the part of application development. Most developers do not have the right tools to create documentation, this task  is generally considered to be unbeneficial, even considered a waste of time in the development process. Thus the authors try to develop an understanding of helper applications commentary and documentation software using Regular Expression and Left Corner Parsing. An application that is flexible enough which can assist in the creation of project documentation as well as help developers accelerate the understanding of a project or program source code within the program.
