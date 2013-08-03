@@ -51,6 +51,11 @@ public class FrmSrcList extends javax.swing.JDialog {
 
         srcList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         srcList.setSelectedIndex(0);
+        srcList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                srcListMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(srcList);
 
         CancelBtn.setText("Cancel");
@@ -104,6 +109,16 @@ public class FrmSrcList extends javax.swing.JDialog {
         FrmSrcList.this.setVisible(false);
         FrmSrcList.this.dispatchEvent(new WindowEvent(FrmSrcList.this, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_CancelBtnActionPerformed
+
+    private void srcListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_srcListMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount()==2) {
+            choosenFile = (srcList.getSelectedValue().toString().isEmpty()) ? null : srcList.getSelectedValue().toString();
+            DoxyApp.bridge.setSelectedSrcFile(choosenFile);
+            FrmSrcList.this.setVisible(false);
+            FrmSrcList.this.dispatchEvent(new WindowEvent(FrmSrcList.this, WindowEvent.WINDOW_CLOSING));
+        }
+    }//GEN-LAST:event_srcListMouseClicked
 
     private void LoadSrcFiles() {
         MyVector javaFiles = DoxyApp.bridge.getListSources();
