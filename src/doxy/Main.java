@@ -499,7 +499,6 @@ public class Main extends javax.swing.JFrame {
             try {
                 MyVector tempFiles = FileKit.getFileDirectory(new File(baseDirDst), ".java");
                 if (!nwFile.exists()) {
-                    System.out.println(tempFiles.toString());
                     nwFile.createNewFile();
                     FileKit.writeTextFile(tempFiles, ndFileList);
                 }
@@ -966,6 +965,8 @@ public class Main extends javax.swing.JFrame {
             for (int i=0;i<filesTemp.size();i++) {
                 // Starting process
                 String slctdFile = filesTemp.get(i).toString();
+                publish("  Processing "+slctdFile);
+                
                 FileInputStream in = new FileInputStream(slctdFile);
                 CompilationUnit comp;
                 try {
@@ -1018,7 +1019,7 @@ public class Main extends javax.swing.JFrame {
     }
     
     private class Translated extends SwingWorker<String, String> {
-        private final JLabel label = new JLabel("  Done", 
+        private final JLabel label = new JLabel("  Translating ...", 
                 new ImageIcon(this.getClass().getResource("/assets/loading.gif")), 
                 SwingConstants.TRAILING);
         private final JPanel panel;
@@ -1042,9 +1043,22 @@ public class Main extends javax.swing.JFrame {
         @Override
         protected String doInBackground() throws Exception {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(4000);
+            } catch (InterruptedException ix) { }
+            
+            publish("  Done");
+            try {
+                Thread.sleep(1500);
             } catch (InterruptedException ix) { }
             return null;
+        }
+        
+        @Override
+        protected void process(List<String> chunks) {
+            label.setText(chunks.get(0));
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.repaint();
         }
 
         @Override
