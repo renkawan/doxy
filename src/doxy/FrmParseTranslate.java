@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -105,14 +104,12 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
             // Starting process
             String slctdFile = DoxyApp.bridge.getSelectedSrcFile();
             FileInputStream in = new FileInputStream(slctdFile);
-            CompilationUnit comp;
             try {
-                comp = JavaParser.parse(in);
+                cu = JavaParser.parse(in);
             } finally {
                 in.close();
             }
-            List<Comment> srcComments = comp.getComments();
-            List<Comment> newComments = new ArrayList<>();
+            List<Comment> srcComments = cu.getComments();
             StringBuilder oriComments = new StringBuilder();
             StringBuilder resComments = new StringBuilder();
             for (Comment cm : srcComments){
@@ -120,14 +117,13 @@ public class FrmParseTranslate extends javax.swing.JInternalFrame {
                 String [] contents = cm.getContent().split("\n");
                 StringBuilder bContent = FileKit.extractAndTranslate(contents);
                 cm.setContent(bContent.toString());
-                resComments.append(cm.getContent());
-                newComments.add(cm);
+                resComments.append(cm.toString());
             }
             publish("  Done");
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException ix) { }
-            String[] res = {oriComments.toString(), newComments.toString()};
+            String[] res = {oriComments.toString(), resComments.toString()};
             return res;
         }
 

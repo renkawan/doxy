@@ -637,7 +637,7 @@ public class Main extends javax.swing.JFrame {
     private void MISaveProjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MISaveProjectActionPerformed
         // TODO add your handling code here:
         JOptionPane.showMessageDialog(null, "The project successfully saved in "+
-                    baseOutputDir+"/"+projectName, "Information", JOptionPane.INFORMATION_MESSAGE);
+                    baseOutputDir+projectName, "Information", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_MISaveProjectActionPerformed
 
     private void generateDocs(String lang) {

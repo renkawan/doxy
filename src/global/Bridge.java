@@ -138,29 +138,48 @@ public class Bridge {
     
     /**
      * Get last visited line of code
-     *
-     * @return
+     * @return int
      */
     public int getLastLine() {
         return lastLineVisited;
     }
     
+    /**
+     * Check if a source file has been choose
+     * @return boolean
+     */
     public boolean isFileChoosen() {
         return isChoosen;
     }
     
+    /**
+     * Set working path from recent project
+     * @param recent 
+     */
     public void setFromRecent(boolean recent) {
         fromRecent = recent;
     }
     
+    /**
+     * Check if working path is from recent project or not
+     * @return boolean
+     */
     public boolean isFromRecent() {
         return fromRecent;
     }
     
+    /**
+     * Set last path location
+     * @param lastPath 
+     */
     public void setLastPath(String lastPath) {
         this.lastPath = lastPath;
     }
     
+    /**
+     * Get last visited path
+     * @return 
+     */
     public String getLastPath() {
         return lastPath;
     }

@@ -72,6 +72,9 @@
             <Property name="selectionMode" type="int" value="1"/>
             <Property name="selectedIndex" type="int" value="0"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="srcListMouseClicked"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
