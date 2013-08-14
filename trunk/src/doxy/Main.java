@@ -23,8 +23,6 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -684,16 +682,6 @@ public class Main extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-    
-    public static void pipeStream(InputStream input, OutputStream output) throws IOException {
-        byte buffer[] = new byte[1024];
-        int numRead;
-        do {
-            numRead = input.read(buffer);
-            output.write(buffer, 0, numRead);
-        } while (input.available() > 0);
-        output.flush();
     }
     
     private void openMainImage() {
