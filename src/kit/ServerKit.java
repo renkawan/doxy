@@ -26,10 +26,11 @@ public class ServerKit {
      * @throws IOException
      */
     public static String getServerResponse(String comments, String accessFile) throws IOException {
+        String extStm = ".php";
         String result = "";
         String server = DoxyApp.myServer;
         
-        URL url = new URL(server+accessFile);
+        URL url = new URL(server+accessFile+extStm);
         String data = "text=" + URLEncoder.encode(comments, "UTF-8");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         

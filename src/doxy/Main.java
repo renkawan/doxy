@@ -623,6 +623,22 @@ public class Main extends javax.swing.JFrame {
 
     private void MIEnglishActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MIEnglishActionPerformed
         // TODO add your handling code here:
+        String baseWorkingDir = baseOutputDir+projectName;
+        /**
+         * Create first list file
+         * List all original source code
+         */
+        MyVector allFiles = DoxyApp.bridge.getListSources();
+        try {
+            File srcLst = new File(baseWorkingDir+"/src.lst");
+            if (!srcLst.exists()) {
+                srcLst.createNewFile();
+                FileKit.writeTextFile(allFiles, baseWorkingDir+"/src.lst");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         generateDocs("english");
     }//GEN-LAST:event_MIEnglishActionPerformed
 

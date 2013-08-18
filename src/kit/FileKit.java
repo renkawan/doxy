@@ -179,6 +179,7 @@ public class FileKit {
      * @throws Exception 
      */
     public static StringBuilder extractAndTranslate(String [] contents) throws Exception {
+        String stemComments = "trans_comments";
         StringBuilder bContent = new StringBuilder();
         for (int i=0;i<contents.length;i++) {
             if (contents[i].trim().equals("")) {
@@ -195,7 +196,7 @@ public class FileKit {
                         
                         // Skip parenthesis symbol use reges pattern : \([^\(]*\)
                         String translated = ServerKit.getServerResponse(
-                                contents[i].replaceAll("\\([^\\(]*\\)", ""), "trans_comments.php");
+                                contents[i].replaceAll("\\([^\\(]*\\)", ""), stemComments);
                         bContent.append("  ").append(translated).append("\n");
                     } else {
                         bContent.append(contents[i]).append("\n");
