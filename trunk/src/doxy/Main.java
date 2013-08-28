@@ -7,6 +7,7 @@ package doxy;
 import global.DoxyApp;
 import global.MyVector;
 import japa.parser.JavaParser;
+import japa.parser.ParseException;
 import japa.parser.ast.Comment;
 import japa.parser.ast.CompilationUnit;
 import kit.FileKit;
@@ -22,6 +23,7 @@ import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -524,15 +526,23 @@ public class Main extends javax.swing.JFrame {
         frameSrc.setVisible(true);
         
         if (DoxyApp.bridge.isFileChoosen()) {
-            FrmParseFile frmParse = new FrmParseFile();
-            MyDesktopPane.add(frmParse);
-            frmParse.setVisible(true);
-            frmParse.setBorder(null);
             try {
-                frmParse.setMaximum(true);
-                ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
-            } catch (PropertyVetoException pvx) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+                FrmParseFile frmParse = new FrmParseFile();
+                MyDesktopPane.add(frmParse);
+                frmParse.setVisible(true);
+                frmParse.setBorder(null);
+                try {
+                    frmParse.setMaximum(true);
+                    ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
+                } catch (PropertyVetoException pvx) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_MIParseFileActionPerformed
@@ -596,21 +606,29 @@ public class Main extends javax.swing.JFrame {
         if (evt.getClickCount()==2) {
             TreePath tp = MyTree.getPathForLocation(evt.getX(), evt.getY());
             if (tp != null) {
-                String fullPath = tp.toString().replace("[", "").replace(" ", "");
-                fullPath = fullPath.replace("]", "");
-                fullPath = fullPath.replace(",", "\\");
-                DoxyApp.bridge.setSelectedSrcFile(fullPath);
-                
-                clearDesktopPane();
-                FrmParseFile frmParse = new FrmParseFile();
-                MyDesktopPane.add(frmParse);
-                frmParse.setVisible(true);
-                frmParse.setBorder(null);
                 try {
-                    frmParse.setMaximum(true);
-                    ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
-                } catch (PropertyVetoException pvx) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+                    String fullPath = tp.toString().replace("[", "").replace(" ", "");
+                    fullPath = fullPath.replace("]", "");
+                    fullPath = fullPath.replace(",", "\\");
+                    DoxyApp.bridge.setSelectedSrcFile(fullPath);
+                    
+                    clearDesktopPane();
+                    FrmParseFile frmParse = new FrmParseFile();
+                    MyDesktopPane.add(frmParse);
+                    frmParse.setVisible(true);
+                    frmParse.setBorder(null);
+                    try {
+                        frmParse.setMaximum(true);
+                        ((javax.swing.plaf.basic.BasicInternalFrameUI)frmParse.getUI()).setNorthPane(null);
+                    } catch (PropertyVetoException pvx) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, pvx);
+                    }
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ParseException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
